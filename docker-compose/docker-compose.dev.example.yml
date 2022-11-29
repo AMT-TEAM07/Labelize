@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+ data-object:
+   build:
+     context: ./../data-object-service
+     target: development
+   ports:
+     - 8080:8080
+     - 8000:8000
+   environment:
+     - SERVER_PORT=8080
+   volumes:
+     - ./../data-object-service:/app
+ label-detector:
+    build:
+     context: ./../label-detector-service
+     target: development
+    ports:
+      - 8081:8081
+      - 8001:8001
+    environment:
+      - SERVER_PORT=8081
+    volumes:
+      - ./../label-detector-service:/app
