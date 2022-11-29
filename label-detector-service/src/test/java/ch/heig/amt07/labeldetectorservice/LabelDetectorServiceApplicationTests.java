@@ -8,6 +8,7 @@ class LabelDetectorServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		assert(true);
 	}
 
 }
