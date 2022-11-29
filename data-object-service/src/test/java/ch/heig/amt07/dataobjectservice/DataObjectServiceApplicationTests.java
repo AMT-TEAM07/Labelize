@@ -8,6 +8,7 @@ class DataObjectServiceApplicationTests {
 
     @Test
     void contextLoads() {
+        assert(true);
     }
 
 }
