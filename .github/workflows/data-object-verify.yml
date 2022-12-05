@@ -10,7 +10,6 @@ on:
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
-    path: data-object
     defaults:
     run:
       working-directory: data-object
