@@ -1,4 +1,4 @@
-name: Verify Data Object Service
+name: Verify & Package Data Object Service
 on:
   push:
     branches:
@@ -10,6 +10,10 @@ on:
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
+    path: data-object
+    defaults:
+    run:
+      working-directory: data-object
     env:
       AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
