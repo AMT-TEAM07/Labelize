@@ -9,7 +9,7 @@ on:
       - ".github/workflows/data-object-verify.yml"
 defaults:
   run:
-    working-directory: ./data-object
+    working-directory: data-object
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
@@ -23,7 +23,10 @@ jobs:
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       TEST_AWS_DEFAULT_REGION: eu-west-2
     steps:
+      - name: Checkout Data Object Service
       - uses: actions/checkout@v2
+        with:
+          path: data-object
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
