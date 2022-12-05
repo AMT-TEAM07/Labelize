@@ -7,12 +7,12 @@ on:
     paths:
       - "data-object/**"
       - ".github/workflows/data-object-verify.yml"
+defaults:
+  run:
+    working-directory: ./data-object
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: data-object
     env:
       AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
