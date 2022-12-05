@@ -1,10 +1,12 @@
-name: Verify & Package Data Object Service
+name: Verify Data Object Service
 on:
   push:
     branches:
+      - main
       - dev
     paths:
       - "data-object/**"
+      - ".github/workflows/data-object-verify.yml"
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
@@ -28,5 +30,3 @@ jobs:
         run: mvn --batch-mode --update-snapshots verify
       - name: Package with Maven
         run: mvn package -DskipTests
-      - name: Run jar
-        run: java -jar target/*.jar
