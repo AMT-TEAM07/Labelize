@@ -7,9 +7,6 @@ on:
     paths:
       - "data-object/**"
       - ".github/workflows/data-object-verify.yml"
-defaults:
-  run:
-    working-directory: data-object
 jobs:
   verify-package:
     runs-on: ubuntu-22.04
@@ -24,7 +21,7 @@ jobs:
       TEST_AWS_DEFAULT_REGION: eu-west-2
     steps:
       - name: Checkout Data Object Service
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: data-object
       - name: Set up JDK 17
@@ -34,5 +31,7 @@ jobs:
           distribution: "temurin"
       - name: Verify with Maven
         run: mvn --batch-mode --update-snapshots verify
+        working-directory: data-object
       - name: Package with Maven
         run: mvn package -DskipTests
+        working-directory: data-object
