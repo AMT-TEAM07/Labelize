@@ -1,13 +1,13 @@
 name: Deploy on Docker Hub - Data Object Service
 on:
-  workflow_dispatch:
-  workflow_run:
-    workflows: [Verify & Package - Data Object Services]
+  push:
     branches:
       - main
       - dev
-    types:
-      - completed
+    paths:
+      - "data-object-service/**"
+      - ".github/workflows/data-object-verify.yml"
+      - ".github/workflows/data-object-deploy.yml"
 defaults:
   run:
     working-directory: data-object-service
