@@ -1,9 +1,9 @@
-name: Deploy on Docker Hub - Data Object Service
+name: "Deploy on Docker Hub Data Object Service"
 on:
   workflow_run:
     workflows: [Verify Data Object Service]
-    branches: [dev]
     types: [completed]
+    branches: [dev]
 jobs:
   deploy:
     runs-on: ubuntu-latest

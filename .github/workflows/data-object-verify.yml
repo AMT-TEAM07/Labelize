@@ -1,13 +1,9 @@
-name: Verify Data Object Service
+name: "Verify Data Object Service"
 on:
   push:
-    branches:
-      - main
-      - dev
     paths:
       - "data-object-service/**"
       - ".github/workflows/data-object-verify.yml"
-      - ".github/workflows/data-object-deploy.yml"
 defaults:
   run:
     working-directory: data-object-service
