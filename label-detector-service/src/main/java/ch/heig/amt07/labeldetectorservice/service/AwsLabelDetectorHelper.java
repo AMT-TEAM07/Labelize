@@ -12,11 +12,14 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class AwsLabelDetectorHelper {
 
     private final RekognitionClient rekClient;
+    public final int MAX_LABELS = 10;
+    public final double MIN_CONFIDENCE = 90.0;
 
     public AwsLabelDetectorHelper(AwsConfigProvider configProvider) {
         rekClient = RekognitionClient.builder()
@@ -25,37 +28,31 @@ public class AwsLabelDetectorHelper {
                 .build();
     }
 
-    public List<LabelWrapper> execute(String imageUri, int nbLabels) throws IOException{
-        return execute(imageUri, nbLabels, 90.0);
-    }
+    public List<LabelWrapper> execute(String imageUri, Optional<Integer> nbLabels, Optional<Double> minConfidence) throws IOException {
+        int maxLabels = nbLabels.orElse(MAX_LABELS);
+        double minConf = minConfidence.orElse(MIN_CONFIDENCE);
 
-    public List<LabelWrapper> execute(String imageUri, double minConfidence) throws IOException{
-        return execute(imageUri, 10, minConfidence);
-    }
-
-    public List<LabelWrapper> execute(String imageUri) throws IOException{
-        return execute(imageUri, 10, 90.0);
-    }
-
-    public List<LabelWrapper> execute(String imageUri, int nbLabels, double minConfidence) throws IOException {
-        checkNbLabelsAndMinConfidence(nbLabels, minConfidence);
+        checkNbLabelsAndMinConfidence(maxLabels, minConf);
 
         var image = Image.builder()
                 .bytes(SdkBytes.fromInputStream(new BufferedInputStream((new URL(imageUri)).openStream())))
                 .build();
 
-        List<Label> awsLabels = getLabelsfromImage(image, nbLabels, minConfidence);
+        List<Label> awsLabels = getLabelsfromImage(image, maxLabels, minConf);
         return LabelWrapper.from(awsLabels);
     }
 
-    public List<LabelWrapper> executeB64(String imageB64, int nbLabels, double minConfidence) {
-        checkNbLabelsAndMinConfidence(nbLabels, minConfidence);
+    public List<LabelWrapper> executeB64(String imageB64, Optional<Integer> nbLabels, Optional<Double> minConfidence) {
+        int maxLabels = nbLabels.orElse(MAX_LABELS);
+        double minConf = minConfidence.orElse(MIN_CONFIDENCE);
+
+        checkNbLabelsAndMinConfidence(maxLabels, minConf);
 
         var image = Image.builder()
                 .bytes(SdkBytes.fromByteBuffer(ByteBuffer.wrap(java.util.Base64.getDecoder().decode(imageB64))))
                 .build();
 
-        List<Label> awsLabels = getLabelsfromImage(image, nbLabels, minConfidence);
+        List<Label> awsLabels = getLabelsfromImage(image, maxLabels, minConf);
         return LabelWrapper.from(awsLabels);
     }
 

@@ -1,9 +1,9 @@
 package ch.heig.amt07.labeldetectorservice.controller;
 
 import ch.heig.amt07.labeldetectorservice.service.LabelWrapper;
-import org.springframework.web.bind.annotation.GetMapping;
+import ch.heig.amt07.labeldetectorservice.utils.AnalyzeParams;
+import org.springframework.web.bind.annotation.*;
 import ch.heig.amt07.labeldetectorservice.service.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,9 +15,14 @@ class LabelDetectionController{
     public LabelDetectionController(AwsLabelDetectorHelper labelDetector) {
         this.labelDetector = labelDetector;
     }
-    @GetMapping("analyze")
-    List<LabelWrapper> analyze() throws IOException {
-        System.out.println(labelDetector.execute("https://a.cdn-hotels.com/gdcs/production196/d1429/5c2581f0-c31d-11e8-87bb-0242ac11000d.jpg?impolicy=fcrop&w=800&h=533&q=medium"));
-        return labelDetector.execute("https://a.cdn-hotels.com/gdcs/production196/d1429/5c2581f0-c31d-11e8-87bb-0242ac11000d.jpg?impolicy=fcrop&w=800&h=533&q=medium");
+
+    @PostMapping("/analyze/url")
+    List<LabelWrapper> analyzeFromUrl(@RequestBody AnalyzeParams params) throws IOException {
+        return labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence());
+    }
+
+    @PostMapping("/analyze/b64")
+    List<LabelWrapper> analyzeFromB64(@RequestBody AnalyzeParams params) throws IOException {
+        return labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence());
     }
 }
