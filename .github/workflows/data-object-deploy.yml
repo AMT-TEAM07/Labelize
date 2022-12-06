@@ -8,6 +8,9 @@ on:
       - "data-object-service/**"
       - ".github/workflows/data-object-verify.yml"
       - ".github/workflows/data-object-deploy.yml"
+defaults:
+  run:
+    working-directory: data-object-service
 jobs:
   deploy:
     runs-on: ubuntu-22.04
