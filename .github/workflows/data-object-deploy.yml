@@ -32,7 +32,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          path: data-object-service
+          context: data-object-service/.
           file: data-object-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/data-object-service:latest
