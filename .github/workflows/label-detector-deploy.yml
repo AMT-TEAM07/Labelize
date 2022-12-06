@@ -1,17 +1,17 @@
-name: Deploy on Docker Hub - Data Object Service
+name: Deploy on Docker Hub - Label Detector Service
 on:
   workflow_run:
-    workflows: [Verify & Package - Data Object Service]
+    workflows: [Verify & Package - Label Detector Service]
     branches:
       - main
     types:
       - completed
     paths:
-      - "data-object-service/**"
-      - ".github/workflows/data-object-deploy.yml"
+      - "label-detector-service/**"
+      - ".github/workflows/label-detector-deploy.yml"
 defaults:
   run:
-    working-directory: data-object-service
+    working-directory: label-detector-service
 jobs:
   deploy:
     runs-on: ubuntu-22.04
@@ -34,9 +34,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          path: data-object-service
-          context: data-object-service/.
+          path: label-detector-service
+          context: label-detector-service/.
           target: production
-          file: data-object-service/Dockerfile
+          file: label-detector-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/data-object-service:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/label-detector-service:latest

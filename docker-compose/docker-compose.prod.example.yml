@@ -1,9 +1,7 @@
 version: '3.8'
 services:
   data-object:
-    build:
-     context: ./../data-object-service
-     target: production
+    image: YOUR_USERNAME/data-object-service:latest
     ports:
       - 8080:8080
     environment:
@@ -13,9 +11,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=
       - AWS_DEFAULT_REGION=
   label-detector:
-    build:
-     context: ./../label-detector-service
-     target: production
+    image: YOUR_USERNAME/label-detector-service:latest
     ports:
       - 8081:8081
     environment:

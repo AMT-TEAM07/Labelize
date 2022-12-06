@@ -1,26 +1,21 @@
-name: Deploy on Docker Hub - Data Object Service
+name: Deploy on Docker Hub - CLI Client
 on:
   workflow_run:
-    workflows: [Verify & Package - Data Object Service]
+    workflows: [Verify & Package - CLI Client]
     branches:
       - main
     types:
       - completed
     paths:
-      - "data-object-service/**"
-      - ".github/workflows/data-object-deploy.yml"
+      - "cli-client/**"
+      - ".github/workflows/cli-client-deploy.yml"
 defaults:
   run:
-    working-directory: data-object-service
+    working-directory: cli-client
 jobs:
   deploy:
     runs-on: ubuntu-22.04
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    env:
-      AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: eu-west-2
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,9 +29,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          path: data-object-service
-          context: data-object-service/.
+          path: cli-client
+          context: cli-client/.
           target: production
-          file: data-object-service/Dockerfile
+          file: cli-client/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/data-object-service:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/cli-client:latest
