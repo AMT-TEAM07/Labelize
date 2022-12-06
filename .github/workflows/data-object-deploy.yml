@@ -1,7 +1,7 @@
-name: "Deploy on Docker Hub Data Object Service"
+name: "Deploy on Docker Hub - Data Object Service"
 on:
   workflow_run:
-    workflows: [Verify Data Object Service]
+    workflows: [Verify & Package - Data Object Service]
     types: [completed]
     branches: [main]
 jobs:
