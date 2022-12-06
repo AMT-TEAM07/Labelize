@@ -11,9 +11,8 @@ defaults:
   run:
     working-directory: data-object-service
 jobs:
-  Deploy:
+  deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Deploy on Docker Hub
     runs-on: ubuntu-22.04
     env:
       AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
