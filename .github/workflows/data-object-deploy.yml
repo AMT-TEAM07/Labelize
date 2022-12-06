@@ -1,15 +1,9 @@
 name: Deploy on Docker Hub - Data Object Service
 on:
   workflow_run:
-    workflows: [Verify & Package - Data Object Service]
-    branches:
-      - dev
-      - main
-    types:
-      - completed
-defaults:
-  run:
-    working-directory: data-object-service
+    workflows: [Verify Data Object Service]
+    branches: [dev, main]
+    types: [completed]
 jobs:
   deploy:
     runs-on: ubuntu-22.04

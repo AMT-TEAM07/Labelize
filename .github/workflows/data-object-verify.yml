@@ -1,4 +1,4 @@
-name: Verify & Package - Data Object Service
+name: Verify Data Object Service
 on:
   push:
     branches:
