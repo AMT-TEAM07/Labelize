@@ -1,6 +1,7 @@
 package ch.heig.amt07.labeldetectorservice.service;
 
 import ch.heig.amt07.labeldetectorservice.utils.AwsConfigProvider;
+import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
@@ -12,7 +13,8 @@ import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.List;
 
-public class AwsLabelDetectorHelper implements LabelDetectorHelper {
+@Component
+public class AwsLabelDetectorHelper {
 
     private final RekognitionClient rekClient;
 
@@ -24,7 +26,7 @@ public class AwsLabelDetectorHelper implements LabelDetectorHelper {
     }
 
     public List<LabelWrapper> execute(String imageUri, int nbLabels) throws IOException{
-        return execute(imageUri, nbLabels, 80.0);
+        return execute(imageUri, nbLabels, 90.0);
     }
 
     public List<LabelWrapper> execute(String imageUri, double minConfidence) throws IOException{
@@ -32,7 +34,7 @@ public class AwsLabelDetectorHelper implements LabelDetectorHelper {
     }
 
     public List<LabelWrapper> execute(String imageUri) throws IOException{
-        return execute(imageUri, 10, 80.0);
+        return execute(imageUri, 10, 90.0);
     }
 
     public List<LabelWrapper> execute(String imageUri, int nbLabels, double minConfidence) throws IOException {
