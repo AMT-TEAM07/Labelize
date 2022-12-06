@@ -8,9 +8,6 @@ on:
       - "data-object-service/**"
       - ".github/workflows/data-object-verify.yml"
       - ".github/workflows/data-object-deploy.yml"
-defaults:
-  run:
-    working-directory: data-object-service
 jobs:
   deploy:
     runs-on: ubuntu-22.04
@@ -31,6 +28,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile
+          file: data-object-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/data-object-service:latest
