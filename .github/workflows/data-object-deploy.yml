@@ -3,7 +3,7 @@ on:
   workflow_run:
     workflows: [Verify Data Object Service]
     types: [completed]
-    branches: [dev]
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
