@@ -1,5 +1,6 @@
 package ch.heig.amt07.dataobjectservice;
 
+import ch.heig.amt07.dataobjectservice.utils.exceptions.NotEmptyException;
 import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
 import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
 import com.sun.tools.javac.Main;
@@ -131,7 +132,7 @@ class DataObjectServiceApplicationTests {
         assertThrows(ObjectAlreadyExistsException.class, () -> rootObjectManager.createObject(objectName, testImagePath));
     }
 
-    //    @Disabled // Disabled to not spam the bucket creation
+    // @Disabled // Disabled to not spam the bucket creation
     // TODO
     @Test
     void UploadObject_RootObjectDoesntExist_Uploaded() {
@@ -233,11 +234,15 @@ class DataObjectServiceApplicationTests {
 
     @Test
     void RemoveObject_FolderObjectExistWithoutRecursiveOption_ThrowException() {
-        //given
-
-        //when
-
-        //then
+//        //given
+//        var folderName = "folder";
+//        var folderObjectName = folderName + "/" + objectName;
+//        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+//        rootObjectManager.createObject(folderObjectName, testImagePath);
+//        assertTrue(rootObjectManager.existsObject(folderObjectName));
+//
+//        //then
+//        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeObject(folderName));
     }
 
     @Test
@@ -249,6 +254,7 @@ class DataObjectServiceApplicationTests {
         //then
     }
 
+    //@Disabled
     @Test
     void RemoveObject_RootObjectNotEmptyWithoutRecursiveOption_ThrowException() {
         //given
@@ -258,17 +264,9 @@ class DataObjectServiceApplicationTests {
         //then
     }
 
+    //@Disabled
     @Test
     void RemoveObject_RootObjectNotEmptyWithRecursiveOption_Removed() {
-        //given
-
-        //when
-
-        //then
-    }
-
-    @Test
-    void RemoveObject_ObjectNotExists_ThrowException() {
         //given
 
         //when

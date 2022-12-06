@@ -1,6 +1,7 @@
 package ch.heig.amt07.dataobjectservice.service;
 
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
+import ch.heig.amt07.dataobjectservice.utils.exceptions.NotEmptyException;
 import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
 import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -43,36 +44,73 @@ public class AwsDataObjectHelper {
     }
 
     public void createRootObject(String rootObjectName) {
-        if (!existsRootObject(rootObjectName)) {
-            CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
-                    .bucket(rootObjectName)
-                    .build();
-            s3.createBucket(createBucketRequest);
+        if (existsRootObject(rootObjectName)) {
+            throw new ObjectAlreadyExistsException(rootObjectName + " already exists");
         }
+        CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
+                .bucket(rootObjectName)
+                .build();
+        s3.createBucket(createBucketRequest);
     }
 
     public void removeRootObject(String rootObjectName) {
-        if (existsRootObject(rootObjectName)) {
-            DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
-                    .bucket(rootObjectName)
-                    .build();
-            s3.deleteBucket(deleteBucketRequest);
+        if (!existsRootObject(rootObjectName)) {
+            throw new ObjectNotFoundException(rootObjectName + " does not exist");
         }
+
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+                .bucket(rootObjectName)
+                .build();
+        ListObjectsV2Response listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+
+        if (!listObjectsV2Response.contents().isEmpty()) {
+            throw new NotEmptyException(rootObjectName + " is not empty");
+        }
+
+        DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
+                .bucket(rootObjectName)
+                .build();
+        s3.deleteBucket(deleteBucketRequest);
     }
 
-    public void createObject(String objectName, Path filePath) {
-        if (existsObject(objectName)) {
-            LOG.log(Level.INFO, "Object {0} already exists", objectName);
-            throw new ObjectAlreadyExistsException(objectName + " already exists");
+    public void removeRootObjectRecursively(String rootObjectName) {
+        if (!existsRootObject(rootObjectName)) {
+            throw new ObjectNotFoundException(rootObjectName + " does not exist");
         }
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
+
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+                .bucket(rootObjectName)
+                .build();
+        ListObjectsV2Response listObjectsV2Response;
+        do {
+            listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+            for (S3Object s3Object : listObjectsV2Response.contents()) {
+                DeleteObjectRequest request = DeleteObjectRequest.builder()
+                        .bucket(rootObjectName)
+                        .key(s3Object.key())
+                        .build();
+                s3.deleteObject(request);
+            }
+        } while (listObjectsV2Response.isTruncated());
+
+        DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(rootObjectName).build();
+        s3.deleteBucket(deleteBucketRequest);
+    }
+
+    public boolean existsFolderObject(String objectName) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(rootObjectName)
                 .key(objectName)
                 .build();
-        s3.putObject(objectRequest, RequestBody.fromFile(filePath));
+        try {
+            var objectResponse = s3.getObject(getObjectRequest, Path.of(objectName));
+            return objectResponse != null && objectResponse.contentLength() == 0;
+        } catch (NoSuchKeyException e) {
+           throw new ObjectNotFoundException(objectName + " does not exist");
+        }
     }
 
-    public boolean existsObject(String objectName) {
+    public boolean existsObject(String objectName){
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                 .bucket(rootObjectName)
                 .key(objectName)
@@ -86,10 +124,32 @@ public class AwsDataObjectHelper {
         }
     }
 
+    public void createObject(String objectName, Path filePath) {
+        if (existsObject(objectName)) {
+            throw new ObjectAlreadyExistsException(objectName + " already exists");
+        }
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+                .bucket(rootObjectName)
+                .key(objectName)
+                .build();
+        s3.putObject(objectRequest, RequestBody.fromFile(filePath));
+    }
+
     public void removeObject(String objectName) {
         if (!existsObject(objectName)) {
             throw new ObjectNotFoundException(objectName + " does not exist");
         }
+
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+                .bucket(rootObjectName)
+                .prefix(objectName)
+                .build();
+        ListObjectsV2Response listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+
+        if (listObjectsV2Response.contents().size() != 1) {
+            throw new NotEmptyException(rootObjectName + " is not empty");
+        }
+
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(rootObjectName)
                 .key(objectName)

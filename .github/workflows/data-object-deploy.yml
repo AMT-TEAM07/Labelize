@@ -3,12 +3,10 @@ on:
   workflow_run:
     workflows: [Verify & Package - Data Object Service]
     branches:
+      - dev
       - main
     types:
       - completed
-    paths:
-      - "data-object-service/**"
-      - ".github/workflows/data-object-deploy.yml"
 defaults:
   run:
     working-directory: data-object-service
