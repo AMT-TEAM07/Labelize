@@ -1,11 +1,13 @@
 package ch.heig.amt07.labeldetectorservice.utils;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 
+@Component
 public class AwsConfigProvider {
     private final AwsCredentialsProvider credentialsProvider;
     private final Region region;
