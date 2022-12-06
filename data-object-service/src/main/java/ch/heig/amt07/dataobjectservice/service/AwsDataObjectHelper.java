@@ -1,6 +1,8 @@
 package ch.heig.amt07.dataobjectservice.service;
 
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
+import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
+import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -11,7 +13,7 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AwsDataObjectHelper implements DataObjectHelper {
+public class AwsDataObjectHelper {
 
     private final AwsConfigProvider configProvider;
     private static final Logger LOG = Logger.getLogger(AwsDataObjectHelper.class.getName());
@@ -59,6 +61,10 @@ public class AwsDataObjectHelper implements DataObjectHelper {
     }
 
     public void createObject(String objectName, Path filePath) {
+        if (existsObject(objectName)) {
+            LOG.log(Level.INFO, "Object {0} already exists", objectName);
+            throw new ObjectAlreadyExistsException(objectName + " already exists");
+        }
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(rootObjectName)
                 .key(objectName)
@@ -81,6 +87,9 @@ public class AwsDataObjectHelper implements DataObjectHelper {
     }
 
     public void removeObject(String objectName) {
+        if (!existsObject(objectName)) {
+            throw new ObjectNotFoundException(objectName + " does not exist");
+        }
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(rootObjectName)
                 .key(objectName)
@@ -97,12 +106,19 @@ public class AwsDataObjectHelper implements DataObjectHelper {
             s3.getObject(getObjectRequest, downloadedImagePath);
             return true;
         } catch (NoSuchKeyException e) {
-            LOG.log(Level.INFO, "{0}", e.getMessage());
-            return false;
+            throw new ObjectNotFoundException("Object " + objectUrl + " not found");
         }
     }
 
-    public String getPresignedUrl(String objectName) {
+    public String getPresignedUrl(String objectName, long expirationTimeinSeconds) {
+        if (expirationTimeinSeconds <= 0) {
+            throw new IllegalArgumentException("Expiration time must be greater than 0");
+        }
+
+        if (!existsObject(objectName)) {
+            throw new ObjectNotFoundException("Object " + objectName + " not found");
+        }
+
         try (S3Presigner presigner = S3Presigner.builder()
                 .credentialsProvider(configProvider.getCredentialsProvider())
                 .region(configProvider.getRegion())
@@ -112,7 +128,7 @@ public class AwsDataObjectHelper implements DataObjectHelper {
                     .key(objectName)
                     .build();
             GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(java.time.Duration.ofMinutes(2))
+                    .signatureDuration(java.time.Duration.ofSeconds(expirationTimeinSeconds))
                     .getObjectRequest(getObjectRequest)
                     .build();
             return presigner.presignGetObject(getObjectPresignRequest).url().toString();

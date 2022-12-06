@@ -1,11 +1,14 @@
 package ch.heig.amt07.dataobjectservice;
 
+import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
+import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
 import com.sun.tools.javac.Main;
 import io.github.cdimascio.dotenv.Dotenv;
 import ch.heig.amt07.dataobjectservice.service.AwsDataObjectHelper;
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataObjectServiceApplicationTests {
 
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
-    private AwsDataObjectHelper bucketManager;
-    private String bucketName;
+    private AwsDataObjectHelper rootObjectManager;
+    private String rootObjectName;
     private Path testImagePath;
     private Path downloadedImagePath;
     private String objectName;
@@ -34,139 +37,243 @@ class DataObjectServiceApplicationTests {
                 .systemProperties()
                 .load();
 
-        bucketName = dotenv.get("TEST_AWS_BUCKET");
+        rootObjectName = dotenv.get("TEST_AWS_BUCKET");
         objectName = "test-image.png";
         testImagePath = Paths.get("src", "test", "resources", objectName);
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
 
         var configProvider = new AwsConfigProvider("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
-        bucketManager = new AwsDataObjectHelper(configProvider, bucketName);
+        rootObjectManager = new AwsDataObjectHelper(configProvider, rootObjectName);
     }
 
+    // DoesExist
+
     @Test
-    void canCreateObjectInExistingRootObject() {
+    void DoesObjectExist_RootObjectExists_Exists() {
         //given
-        assertTrue(bucketManager.existsRootObject(bucketName));
-        assertFalse(bucketManager.existsObject(objectName));
+        var existingRootObjectName = rootObjectName;
+        boolean rootObjectExists;
 
         //when
-        bucketManager.createObject(objectName, testImagePath);
+        rootObjectExists = rootObjectManager.existsRootObject(existingRootObjectName);
 
         //then
-        assertTrue(bucketManager.existsObject(objectName));
+        assertTrue(rootObjectExists);
     }
 
     @Test
-    void canConfirmRootObjectExists() {
+    void DoesObjectExist_RootObjectDoesntExist_DoesntExist() {
         //given
-        String existingBucket = bucketName;
-        boolean actualResult;
+        var notExistingRootObjectName = "notExistingRootObjectName" + rootObjectName;
+        boolean rootObjectExists;
 
         //when
-        actualResult = bucketManager.existsRootObject(existingBucket);
+        rootObjectExists = rootObjectManager.existsRootObject(notExistingRootObjectName);
 
         //then
-        assertTrue(actualResult);
+        assertFalse(rootObjectExists);
     }
 
     @Test
-    void canConfirmRootObjectDoesNotExist() {
+    void DoesObjectExist_RootObjectAndObjectExist_Exists() {
         //given
-        String notExistingBucket = "notExistingBucket-" + bucketName;
-        boolean actualResult;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        boolean objectExists;
 
         //when
-        actualResult = bucketManager.existsRootObject(notExistingBucket);
+        objectExists = rootObjectManager.existsObject(objectName);
 
         //then
-        assertFalse(actualResult);
+        assertTrue(objectExists);
     }
 
     @Test
-    void canConfirmObjectExists() {
-        //given
-        bucketManager.createObject(objectName, testImagePath);
-        boolean actualResult;
-
-        //when
-        actualResult = bucketManager.existsObject(objectName);
-
-        //then
-        assertTrue(actualResult);
-    }
-
-    @Test
-    void canConfirmObjectDoesNotExist() {
+    void DoesObjectExist_RootObjectExistObjectDoesntExist_DoesntExist() {
         //given
         String notExistingFileName = "notExistingFile.jpg";
-        assertTrue(bucketManager.existsRootObject(bucketName));
-        boolean actualResult;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        boolean objectExists;
 
         //when
-        actualResult = bucketManager.existsObject(notExistingFileName);
+        objectExists = rootObjectManager.existsObject(notExistingFileName);
 
         //then
-        assertFalse(actualResult);
+        assertFalse(objectExists);
+    }
+
+    // Upload Object
+
+    @Test
+    void UploadObject_RootObjectExistsNewObject_Uploaded() {
+        //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertFalse(rootObjectManager.existsObject(objectName));
+
+        //when
+        rootObjectManager.createObject(objectName, testImagePath);
+
+        //then
+        assertTrue(rootObjectManager.existsObject(objectName));
     }
 
     @Test
-    void canRemoveObjectFromNotEmptyRootObject() {
+    void UploadObject_RootObjectExistsObjectAlreadyExists_ThrowException() {
         //given
-        assertTrue(bucketManager.existsRootObject(bucketName));
-        bucketManager.createObject(objectName, testImagePath);
-        assertTrue(bucketManager.existsObject(objectName));
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertFalse(rootObjectManager.existsObject(objectName));
 
         //when
-        bucketManager.removeObject(objectName);
+        rootObjectManager.createObject(objectName, testImagePath);
 
         //then
-        assertFalse(bucketManager.existsObject(objectName));
+        assertTrue(rootObjectManager.existsObject(objectName));
+        assertThrows(ObjectAlreadyExistsException.class, () -> rootObjectManager.createObject(objectName, testImagePath));
     }
 
+    //    @Disabled // Disabled to not spam the bucket creation
+    // TODO
     @Test
-    void canDownloadExistingObject() {
+    void UploadObject_RootObjectDoesntExist_Uploaded() {
         //given
-        bucketManager.createObject(objectName, testImagePath);
-        assertTrue(bucketManager.existsObject(objectName));
-        boolean actualResult;
 
         //when
-        actualResult = bucketManager.downloadObject(objectName, downloadedImagePath);
 
         //then
-        assertTrue(actualResult);
+    }
+
+    // Download Object
+
+    @Test
+    void DownloadObject_ObjectExists_Downloaded() {
+        //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(objectName));
+        boolean objectExists;
+
+        //when
+        objectExists = rootObjectManager.downloadObject(objectName, downloadedImagePath);
+
+        //then
+        assertTrue(objectExists);
         File file = new File(downloadedImagePath.toUri());
         assertTrue(file.exists());
         assertEquals(file.length(), testImagePath.toFile().length());
     }
 
     @Test
-    void returnFalseWhenDownloadingNotExistingObject() {
+    void DownloadObject_ObjectDoesntExist_ThrowException() {
         //given
-        assertFalse(bucketManager.existsObject(objectName));
-        boolean actualResult;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertFalse(rootObjectManager.existsObject(objectName));
 
         //when
-        actualResult = bucketManager.downloadObject(objectName, downloadedImagePath);
+        File file = new File(downloadedImagePath.toUri());
 
         //then
-        assertFalse(actualResult);
-        File file = new File(downloadedImagePath.toUri());
+        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.downloadObject(objectName, downloadedImagePath));
         assertFalse(file.exists());
     }
 
+    // Publish Object
+
     @Test
-    void canGeneratePresignedPublicUrlForGivenObjectName() {
+    void PublishObject_ObjectExists_Published() {
         //given
-        bucketManager.createObject(objectName, testImagePath);
-        assertTrue(bucketManager.existsObject(objectName));
-        String actualResult;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(objectName));
+        String presignedUrl;
 
         //when
-        actualResult = bucketManager.getPresignedUrl(objectName);
+        presignedUrl = rootObjectManager.getPresignedUrl(objectName, 60);
 
         //then
-        assertNotNull(actualResult);
+        assertNotNull(presignedUrl);
+    }
+
+    @Test
+    void PublishObject_ObjectDoesntExist_ThrowException() {
+        //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        var notExistingObjectName = "notExistingObject.png";
+        assertFalse(rootObjectManager.existsObject(notExistingObjectName));
+
+        //then
+        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.getPresignedUrl(notExistingObjectName, 60));
+    }
+
+    // Remove Object
+
+    @Test
+    void RemoveObject_SingleObjectExists_Removed() {
+        //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(objectName));
+
+        //when
+        rootObjectManager.removeObject(objectName);
+
+        //then
+        assertFalse(rootObjectManager.existsObject(objectName));
+    }
+
+    @Test
+    void RemoveObject_SingleObjectDoesntExist_ThrowException() {
+        //given
+        var notExistingObjectName = "notExistingObject.png";
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertFalse(rootObjectManager.existsObject(notExistingObjectName));
+
+        //then
+        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.removeObject(notExistingObjectName));
+    }
+
+    @Test
+    void RemoveObject_FolderObjectExistWithoutRecursiveOption_ThrowException() {
+        //given
+
+        //when
+
+        //then
+    }
+
+    @Test
+    void RemoveObject_FolderObjectExistWithRecursiveOption_Removed() {
+        //given
+
+        //when
+
+        //then
+    }
+
+    @Test
+    void RemoveObject_RootObjectNotEmptyWithoutRecursiveOption_ThrowException() {
+        //given
+
+        //when
+
+        //then
+    }
+
+    @Test
+    void RemoveObject_RootObjectNotEmptyWithRecursiveOption_Removed() {
+        //given
+
+        //when
+
+        //then
+    }
+
+    @Test
+    void RemoveObject_ObjectNotExists_ThrowException() {
+        //given
+
+        //when
+
+        //then
     }
 
     @AfterEach
@@ -175,8 +282,8 @@ class DataObjectServiceApplicationTests {
         if (file.exists()) {
             LOG.log(Level.INFO, "{0}", "Deleting file => " + file.delete());
         }
-        if (bucketManager.existsObject(objectName)) {
-            bucketManager.removeObject(objectName);
+        if (rootObjectManager.existsObject(objectName)) {
+            rootObjectManager.removeObject(objectName);
         }
     }
 
