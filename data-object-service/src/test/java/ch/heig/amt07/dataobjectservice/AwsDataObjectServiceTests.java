@@ -1,12 +1,12 @@
 package ch.heig.amt07.dataobjectservice;
 
-import ch.heig.amt07.dataobjectservice.utils.exceptions.NotEmptyException;
-import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
-import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
+import ch.heig.amt07.dataobjectservice.exception.NotEmptyException;
+import ch.heig.amt07.dataobjectservice.exception.ObjectAlreadyExistsException;
+import ch.heig.amt07.dataobjectservice.exception.ObjectNotFoundException;
+import ch.heig.amt07.dataobjectservice.service.AwsDataObjectService;
+import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
 import com.sun.tools.javac.Main;
 import io.github.cdimascio.dotenv.Dotenv;
-import ch.heig.amt07.dataobjectservice.service.AwsDataObjectHelper;
-import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -22,10 +22,10 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class DataObjectServiceApplicationTests {
+class AwsDataObjectServiceTests {
 
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
-    private AwsDataObjectHelper rootObjectManager;
+    private AwsDataObjectService rootObjectManager;
     private String rootObjectName;
     private Path testImagePath;
     private Path downloadedImagePath;
@@ -46,7 +46,7 @@ class DataObjectServiceApplicationTests {
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
 
         var configProvider = new AwsConfigProvider("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
-        rootObjectManager = new AwsDataObjectHelper(configProvider, rootObjectName);
+        rootObjectManager = new AwsDataObjectService(configProvider, rootObjectName);
     }
 
     // DoesExist

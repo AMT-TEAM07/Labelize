@@ -1,9 +1,9 @@
 package ch.heig.amt07.dataobjectservice.service;
 
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
-import ch.heig.amt07.dataobjectservice.utils.exceptions.NotEmptyException;
-import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectAlreadyExistsException;
-import ch.heig.amt07.dataobjectservice.utils.exceptions.ObjectNotFoundException;
+import ch.heig.amt07.dataobjectservice.exception.NotEmptyException;
+import ch.heig.amt07.dataobjectservice.exception.ObjectAlreadyExistsException;
+import ch.heig.amt07.dataobjectservice.exception.ObjectNotFoundException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -14,14 +14,14 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AwsDataObjectHelper {
+public class AwsDataObjectService {
 
     private final AwsConfigProvider configProvider;
-    private static final Logger LOG = Logger.getLogger(AwsDataObjectHelper.class.getName());
+    private static final Logger LOG = Logger.getLogger(AwsDataObjectService.class.getName());
     private final S3Client s3;
     private final String rootObjectName;
 
-    public AwsDataObjectHelper(AwsConfigProvider configProvider, String rootObjectName) {
+    public AwsDataObjectService(AwsConfigProvider configProvider, String rootObjectName) {
         this.configProvider = configProvider;
         this.rootObjectName = rootObjectName;
         s3 = S3Client.builder()
