@@ -53,7 +53,7 @@ public class AwsDataObjectHelper {
         s3.createBucket(createBucketRequest);
     }
 
-    public void removeRootObject(String rootObjectName) {
+    public void removeRootObject(String rootObjectName, boolean recursive) {
         if (!existsRootObject(rootObjectName)) {
             throw new ObjectNotFoundException(rootObjectName + " does not exist");
         }
@@ -63,38 +63,30 @@ public class AwsDataObjectHelper {
                 .build();
         ListObjectsV2Response listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
 
-        if (!listObjectsV2Response.contents().isEmpty()) {
-            throw new NotEmptyException(rootObjectName + " is not empty");
-        }
+        if (recursive) {
+            do {
+                listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+                for (S3Object s3Object : listObjectsV2Response.contents()) {
+                    DeleteObjectRequest request = DeleteObjectRequest.builder()
+                            .bucket(rootObjectName)
+                            .key(s3Object.key())
+                            .build();
+                    s3.deleteObject(request);
+                }
+            } while (listObjectsV2Response.isTruncated());
 
-        DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
-                .bucket(rootObjectName)
-                .build();
-        s3.deleteBucket(deleteBucketRequest);
-    }
-
-    public void removeRootObjectRecursively(String rootObjectName) {
-        if (!existsRootObject(rootObjectName)) {
-            throw new ObjectNotFoundException(rootObjectName + " does not exist");
-        }
-
-        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
-                .bucket(rootObjectName)
-                .build();
-        ListObjectsV2Response listObjectsV2Response;
-        do {
-            listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
-            for (S3Object s3Object : listObjectsV2Response.contents()) {
-                DeleteObjectRequest request = DeleteObjectRequest.builder()
-                        .bucket(rootObjectName)
-                        .key(s3Object.key())
-                        .build();
-                s3.deleteObject(request);
+            DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(rootObjectName).build();
+            s3.deleteBucket(deleteBucketRequest);
+        } else {
+            if (!listObjectsV2Response.contents().isEmpty()) {
+                throw new NotEmptyException(rootObjectName + " is not empty");
             }
-        } while (listObjectsV2Response.isTruncated());
 
-        DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(rootObjectName).build();
-        s3.deleteBucket(deleteBucketRequest);
+            DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
+                    .bucket(rootObjectName)
+                    .build();
+            s3.deleteBucket(deleteBucketRequest);
+        }
     }
 
     public boolean existsObject(String objectName){
@@ -125,6 +117,10 @@ public class AwsDataObjectHelper {
     }
 
     public void createObject(String objectName, Path filePath) {
+        if (!existsRootObject(rootObjectName)) {
+            createRootObject(rootObjectName);
+        }
+
         if (existsObject(objectName)) {
             throw new ObjectAlreadyExistsException(objectName + " already exists");
         }

@@ -9,6 +9,7 @@ import ch.heig.amt07.dataobjectservice.service.AwsDataObjectHelper;
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -28,9 +29,8 @@ class DataObjectServiceApplicationTests {
     private String rootObjectName;
     private Path testImagePath;
     private Path downloadedImagePath;
+    private String folderName;
     private String objectName;
-
-    private String folderName = "test-folder/";
 
     @BeforeEach
     public void setup() {
@@ -40,6 +40,7 @@ class DataObjectServiceApplicationTests {
                 .load();
 
         rootObjectName = dotenv.get("TEST_AWS_BUCKET");
+        folderName = "test-folder/";
         objectName = "test-image.png";
         testImagePath = Paths.get("src", "test", "resources", objectName);
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
@@ -133,15 +134,20 @@ class DataObjectServiceApplicationTests {
         assertThrows(ObjectAlreadyExistsException.class, () -> rootObjectManager.createObject(objectName, testImagePath));
     }
 
-    // @Disabled // Disabled to not spam the bucket creation
-    // TODO
+    @Disabled("to not spam bucket manipulation")
     @Test
     void UploadObject_RootObjectDoesntExist_Uploaded() {
         //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.removeRootObject(rootObjectName, true);
+        assertFalse(rootObjectManager.existsRootObject(rootObjectName));
 
         //when
+        rootObjectManager.createObject(objectName, testImagePath);
 
         //then
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertTrue(rootObjectManager.existsObject(objectName));
     }
 
     // Download Object
@@ -259,24 +265,32 @@ class DataObjectServiceApplicationTests {
         assertFalse(rootObjectManager.existsObject(folderObjectName));
     }
 
-    //@Disabled
+    @Disabled("to not spam bucket manipulation")
     @Test
     void RemoveObject_RootObjectNotEmptyWithoutRecursiveOption_ThrowException() {
         //given
-
-        //when
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(objectName));
 
         //then
+        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeRootObject(rootObjectName, false));
     }
 
-    //@Disabled
+    @Disabled("to not spam bucket manipulation")
     @Test
     void RemoveObject_RootObjectNotEmptyWithRecursiveOption_Removed() {
         //given
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(objectName));
 
         //when
+        rootObjectManager.removeRootObject(rootObjectName, true);
 
         //then
+        assertFalse(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createRootObject(rootObjectName);
     }
 
     @AfterEach
@@ -285,6 +299,7 @@ class DataObjectServiceApplicationTests {
         if (file.exists()) {
             LOG.log(Level.INFO, "{0}", "Deleting file => " + file.delete());
         }
+
         if (rootObjectManager.existsObject(objectName)) {
             rootObjectManager.removeObject(objectName, false);
         }
