@@ -116,7 +116,7 @@ public class AwsDataObjectService {
         return !listObjectsV2Response.contents().isEmpty();
     }
 
-    public void createObject(String objectName, Path filePath) {
+    public void createObject(String objectName, byte[] file) {
         if (!existsRootObject(rootObjectName)) {
             createRootObject(rootObjectName);
         }
@@ -128,7 +128,7 @@ public class AwsDataObjectService {
                 .bucket(rootObjectName)
                 .key(objectName)
                 .build();
-        s3.putObject(objectRequest, RequestBody.fromFile(filePath));
+        s3.putObject(objectRequest, RequestBody.fromBytes(file));
     }
 
     public void removeObject(String objectName, Boolean recursive) {

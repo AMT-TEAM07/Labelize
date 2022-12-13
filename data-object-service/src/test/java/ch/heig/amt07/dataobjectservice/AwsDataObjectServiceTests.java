@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class AwsDataObjectServiceTests {
 
     private static final Logger LOG = Logger.getLogger(Main.class.getName());
-    private AwsDataObjectService rootObjectManager;
+    private AwsDataObjectService dataObjectService;
     private String rootObjectName;
-    private Path testImagePath;
+    private byte[] testFile;
     private Path downloadedImagePath;
     private String folderName;
     private String objectName;
@@ -42,11 +43,19 @@ class AwsDataObjectServiceTests {
         rootObjectName = dotenv.get("TEST_AWS_BUCKET");
         folderName = "test-folder/";
         objectName = "test-image.png";
-        testImagePath = Paths.get("src", "test", "resources", objectName);
+        Path testImagePath = Paths.get("src", "test", "resources", objectName);
+
+        testFile = new byte[0];
+        try {
+            testFile = Files.readAllBytes(testImagePath);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, e.getMessage());
+        }
+
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
 
         var configProvider = new AwsConfigProvider("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
-        rootObjectManager = new AwsDataObjectService(configProvider, rootObjectName);
+        dataObjectService = new AwsDataObjectService(configProvider, rootObjectName);
     }
 
     // DoesExist
@@ -58,7 +67,7 @@ class AwsDataObjectServiceTests {
         boolean rootObjectExists;
 
         //when
-        rootObjectExists = rootObjectManager.existsRootObject(existingRootObjectName);
+        rootObjectExists = dataObjectService.existsRootObject(existingRootObjectName);
 
         //then
         assertTrue(rootObjectExists);
@@ -71,7 +80,7 @@ class AwsDataObjectServiceTests {
         boolean rootObjectExists;
 
         //when
-        rootObjectExists = rootObjectManager.existsRootObject(notExistingRootObjectName);
+        rootObjectExists = dataObjectService.existsRootObject(notExistingRootObjectName);
 
         //then
         assertFalse(rootObjectExists);
@@ -80,12 +89,12 @@ class AwsDataObjectServiceTests {
     @Test
     void DoesObjectExist_RootObjectAndObjectExist_Exists() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
         boolean objectExists;
 
         //when
-        objectExists = rootObjectManager.existsObject(objectName);
+        objectExists = dataObjectService.existsObject(objectName);
 
         //then
         assertTrue(objectExists);
@@ -95,11 +104,11 @@ class AwsDataObjectServiceTests {
     void DoesObjectExist_RootObjectExistObjectDoesntExist_DoesntExist() {
         //given
         String notExistingFileName = "notExistingFile.jpg";
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
         boolean objectExists;
 
         //when
-        objectExists = rootObjectManager.existsObject(notExistingFileName);
+        objectExists = dataObjectService.existsObject(notExistingFileName);
 
         //then
         assertFalse(objectExists);
@@ -110,44 +119,44 @@ class AwsDataObjectServiceTests {
     @Test
     void UploadObject_RootObjectExistsNewObject_Uploaded() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        assertFalse(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        assertFalse(dataObjectService.existsObject(objectName));
 
         //when
-        rootObjectManager.createObject(objectName, testImagePath);
+        dataObjectService.createObject(objectName, testFile);
 
         //then
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsObject(objectName));
     }
 
     @Test
     void UploadObject_RootObjectExistsObjectAlreadyExists_ThrowException() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        assertFalse(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        assertFalse(dataObjectService.existsObject(objectName));
 
         //when
-        rootObjectManager.createObject(objectName, testImagePath);
+        dataObjectService.createObject(objectName, testFile);
 
         //then
-        assertTrue(rootObjectManager.existsObject(objectName));
-        assertThrows(ObjectAlreadyExistsException.class, () -> rootObjectManager.createObject(objectName, testImagePath));
+        assertTrue(dataObjectService.existsObject(objectName));
+        assertThrows(ObjectAlreadyExistsException.class, () -> dataObjectService.createObject(objectName, testFile));
     }
 
     @Disabled("to not spam bucket manipulation")
     @Test
     void UploadObject_RootObjectDoesntExist_Uploaded() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.removeRootObject(rootObjectName, true);
-        assertFalse(rootObjectManager.existsRootObject(rootObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.removeRootObject(rootObjectName, true);
+        assertFalse(dataObjectService.existsRootObject(rootObjectName));
 
         //when
-        rootObjectManager.createObject(objectName, testImagePath);
+        dataObjectService.createObject(objectName, testFile);
 
         //then
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        assertTrue(dataObjectService.existsObject(objectName));
     }
 
     // Download Object
@@ -155,32 +164,37 @@ class AwsDataObjectServiceTests {
     @Test
     void DownloadObject_ObjectExists_Downloaded() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
+        assertTrue(dataObjectService.existsObject(objectName));
         boolean objectExists;
 
         //when
-        objectExists = rootObjectManager.downloadObject(objectName, downloadedImagePath);
+        objectExists = dataObjectService.downloadObject(objectName, downloadedImagePath);
 
         //then
         assertTrue(objectExists);
-        File file = new File(downloadedImagePath.toUri());
-        assertTrue(file.exists());
-        assertEquals(file.length(), testImagePath.toFile().length());
+        var file = new byte[0];
+        try {
+            file = Files.readAllBytes(downloadedImagePath);
+        } catch(Exception e) {
+            LOG.log(Level.SEVERE, e.getMessage());
+        }
+        assertTrue(file.length > 0);
+        assertArrayEquals(file, testFile);
     }
 
     @Test
     void DownloadObject_ObjectDoesntExist_ThrowException() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        assertFalse(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        assertFalse(dataObjectService.existsObject(objectName));
 
         //when
         File file = new File(downloadedImagePath.toUri());
 
         //then
-        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.downloadObject(objectName, downloadedImagePath));
+        assertThrows(ObjectNotFoundException.class, () -> dataObjectService.downloadObject(objectName, downloadedImagePath));
         assertFalse(file.exists());
     }
 
@@ -189,13 +203,13 @@ class AwsDataObjectServiceTests {
     @Test
     void PublishObject_ObjectExists_Published() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
+        assertTrue(dataObjectService.existsObject(objectName));
         String presignedUrl;
 
         //when
-        presignedUrl = rootObjectManager.getPresignedUrl(objectName, 60);
+        presignedUrl = dataObjectService.getPresignedUrl(objectName, 60);
 
         //then
         assertNotNull(presignedUrl);
@@ -204,12 +218,12 @@ class AwsDataObjectServiceTests {
     @Test
     void PublishObject_ObjectDoesntExist_ThrowException() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
         var notExistingObjectName = "notExistingObject.png";
-        assertFalse(rootObjectManager.existsObject(notExistingObjectName));
+        assertFalse(dataObjectService.existsObject(notExistingObjectName));
 
         //then
-        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.getPresignedUrl(notExistingObjectName, 60));
+        assertThrows(ObjectNotFoundException.class, () -> dataObjectService.getPresignedUrl(notExistingObjectName, 60));
     }
 
     // Remove Object
@@ -217,80 +231,80 @@ class AwsDataObjectServiceTests {
     @Test
     void RemoveObject_SingleObjectExists_Removed() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
+        assertTrue(dataObjectService.existsObject(objectName));
 
         //when
-        rootObjectManager.removeObject(objectName, false);
+        dataObjectService.removeObject(objectName, false);
 
         //then
-        assertFalse(rootObjectManager.existsObject(objectName));
+        assertFalse(dataObjectService.existsObject(objectName));
     }
 
     @Test
     void RemoveObject_SingleObjectDoesntExist_ThrowException() {
         //given
         var notExistingObjectName = "notExistingObject.png";
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        assertFalse(rootObjectManager.existsObject(notExistingObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        assertFalse(dataObjectService.existsObject(notExistingObjectName));
 
         //then
-        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.removeObject(notExistingObjectName, false));
+        assertThrows(ObjectNotFoundException.class, () -> dataObjectService.removeObject(notExistingObjectName, false));
     }
 
     @Test
     void RemoveObject_FolderObjectExistWithoutRecursiveOption_ThrowException() {
         //given
         var folderObjectName = folderName + objectName;
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(folderObjectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(folderObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(folderObjectName, testFile);
+        assertTrue(dataObjectService.existsObject(folderObjectName));
 
         //then
-        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeObject(folderName, false));
+        assertThrows(NotEmptyException.class, () -> dataObjectService.removeObject(folderName, false));
     }
 
     @Test
     void RemoveObject_FolderObjectExistWithRecursiveOption_Removed() {
         //given
         var folderObjectName = folderName + objectName;
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(folderObjectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(folderObjectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(folderObjectName, testFile);
+        assertTrue(dataObjectService.existsObject(folderObjectName));
         //when
-        rootObjectManager.removeObject(folderName, true);
+        dataObjectService.removeObject(folderName, true);
 
         //then
-        assertFalse(rootObjectManager.existsObject(folderObjectName));
+        assertFalse(dataObjectService.existsObject(folderObjectName));
     }
 
     @Disabled("to not spam bucket manipulation")
     @Test
     void RemoveObject_RootObjectNotEmptyWithoutRecursiveOption_ThrowException() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
+        assertTrue(dataObjectService.existsObject(objectName));
 
         //then
-        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeRootObject(rootObjectName, false));
+        assertThrows(NotEmptyException.class, () -> dataObjectService.removeRootObject(rootObjectName, false));
     }
 
     @Disabled("to not spam bucket manipulation")
     @Test
     void RemoveObject_RootObjectNotEmptyWithRecursiveOption_Removed() {
         //given
-        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createObject(objectName, testImagePath);
-        assertTrue(rootObjectManager.existsObject(objectName));
+        assertTrue(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createObject(objectName, testFile);
+        assertTrue(dataObjectService.existsObject(objectName));
 
         //when
-        rootObjectManager.removeRootObject(rootObjectName, true);
+        dataObjectService.removeRootObject(rootObjectName, true);
 
         //then
-        assertFalse(rootObjectManager.existsRootObject(rootObjectName));
-        rootObjectManager.createRootObject(rootObjectName);
+        assertFalse(dataObjectService.existsRootObject(rootObjectName));
+        dataObjectService.createRootObject(rootObjectName);
     }
 
     @AfterEach
@@ -300,12 +314,12 @@ class AwsDataObjectServiceTests {
             LOG.log(Level.INFO, "{0}", "Deleting file => " + file.delete());
         }
 
-        if (rootObjectManager.existsObject(objectName)) {
-            rootObjectManager.removeObject(objectName, false);
+        if (dataObjectService.existsObject(objectName)) {
+            dataObjectService.removeObject(objectName, false);
         }
 
-        if (rootObjectManager.existsObject(folderName)) {
-            rootObjectManager.removeObject(folderName, true);
+        if (dataObjectService.existsObject(folderName)) {
+            dataObjectService.removeObject(folderName, true);
         }
     }
 
