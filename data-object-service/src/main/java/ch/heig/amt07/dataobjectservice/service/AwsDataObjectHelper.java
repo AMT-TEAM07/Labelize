@@ -97,31 +97,31 @@ public class AwsDataObjectHelper {
         s3.deleteBucket(deleteBucketRequest);
     }
 
-    public boolean existsFolderObject(String objectName) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(rootObjectName)
-                .key(objectName)
-                .build();
-        try {
-            var objectResponse = s3.getObject(getObjectRequest, Path.of(objectName));
-            return objectResponse != null && objectResponse.contentLength() == 0;
-        } catch (NoSuchKeyException e) {
-           throw new ObjectNotFoundException(objectName + " does not exist");
+    public boolean existsObject(String objectName){
+        if (objectName.endsWith("/")) {
+            return existsFolderObject(objectName);
+        } else {
+            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+                    .bucket(rootObjectName)
+                    .key(objectName)
+                    .build();
+            try {
+                s3.headObject(headObjectRequest);
+                return true;
+            } catch (NoSuchKeyException e) {
+                LOG.log(Level.INFO, "{0}", e.getMessage());
+                return false;
+            }
         }
     }
 
-    public boolean existsObject(String objectName){
-        HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+    private boolean existsFolderObject(String objectName) {
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
                 .bucket(rootObjectName)
-                .key(objectName)
+                .prefix(objectName)
                 .build();
-        try {
-            s3.headObject(headObjectRequest);
-            return true;
-        } catch (NoSuchKeyException e) {
-            LOG.log(Level.INFO, "{0}", e.getMessage());
-            return false;
-        }
+        ListObjectsV2Response listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+        return !listObjectsV2Response.contents().isEmpty();
     }
 
     public void createObject(String objectName, Path filePath) {
@@ -135,26 +135,37 @@ public class AwsDataObjectHelper {
         s3.putObject(objectRequest, RequestBody.fromFile(filePath));
     }
 
-    public void removeObject(String objectName) {
+    public void removeObject(String objectName, Boolean recursive) {
         if (!existsObject(objectName)) {
             throw new ObjectNotFoundException(objectName + " does not exist");
         }
-
         ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
                 .bucket(rootObjectName)
                 .prefix(objectName)
                 .build();
         ListObjectsV2Response listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
 
-        if (listObjectsV2Response.contents().size() != 1) {
-            throw new NotEmptyException(rootObjectName + " is not empty");
+        if (recursive) {
+            do {
+                listObjectsV2Response = s3.listObjectsV2(listObjectsV2Request);
+                for (S3Object s3Object : listObjectsV2Response.contents()) {
+                    DeleteObjectRequest request = DeleteObjectRequest.builder()
+                            .bucket(rootObjectName)
+                            .key(s3Object.key())
+                            .build();
+                    s3.deleteObject(request);
+                }
+            } while (listObjectsV2Response.isTruncated());
+        } else {
+            if (objectName.endsWith("/") && !listObjectsV2Response.contents().isEmpty()) {
+                throw new NotEmptyException(rootObjectName + " is not empty");
+            }
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(rootObjectName)
+                    .key(objectName)
+                    .build();
+            s3.deleteObject(deleteObjectRequest);
         }
-
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(rootObjectName)
-                .key(objectName)
-                .build();
-        s3.deleteObject(deleteObjectRequest);
     }
 
     public boolean downloadObject(String objectUrl, Path downloadedImagePath) {

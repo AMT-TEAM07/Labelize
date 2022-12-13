@@ -9,7 +9,6 @@ import ch.heig.amt07.dataobjectservice.service.AwsDataObjectHelper;
 import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -30,6 +29,8 @@ class DataObjectServiceApplicationTests {
     private Path testImagePath;
     private Path downloadedImagePath;
     private String objectName;
+
+    private String folderName = "test-folder/";
 
     @BeforeEach
     public void setup() {
@@ -215,7 +216,7 @@ class DataObjectServiceApplicationTests {
         assertTrue(rootObjectManager.existsObject(objectName));
 
         //when
-        rootObjectManager.removeObject(objectName);
+        rootObjectManager.removeObject(objectName, false);
 
         //then
         assertFalse(rootObjectManager.existsObject(objectName));
@@ -229,29 +230,33 @@ class DataObjectServiceApplicationTests {
         assertFalse(rootObjectManager.existsObject(notExistingObjectName));
 
         //then
-        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.removeObject(notExistingObjectName));
+        assertThrows(ObjectNotFoundException.class, () -> rootObjectManager.removeObject(notExistingObjectName, false));
     }
 
     @Test
     void RemoveObject_FolderObjectExistWithoutRecursiveOption_ThrowException() {
-//        //given
-//        var folderName = "folder";
-//        var folderObjectName = folderName + "/" + objectName;
-//        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
-//        rootObjectManager.createObject(folderObjectName, testImagePath);
-//        assertTrue(rootObjectManager.existsObject(folderObjectName));
-//
-//        //then
-//        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeObject(folderName));
+        //given
+        var folderObjectName = folderName + objectName;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(folderObjectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(folderObjectName));
+
+        //then
+        assertThrows(NotEmptyException.class, () -> rootObjectManager.removeObject(folderName, false));
     }
 
     @Test
     void RemoveObject_FolderObjectExistWithRecursiveOption_Removed() {
         //given
-
+        var folderObjectName = folderName + objectName;
+        assertTrue(rootObjectManager.existsRootObject(rootObjectName));
+        rootObjectManager.createObject(folderObjectName, testImagePath);
+        assertTrue(rootObjectManager.existsObject(folderObjectName));
         //when
+        rootObjectManager.removeObject(folderName, true);
 
         //then
+        assertFalse(rootObjectManager.existsObject(folderObjectName));
     }
 
     //@Disabled
@@ -281,7 +286,11 @@ class DataObjectServiceApplicationTests {
             LOG.log(Level.INFO, "{0}", "Deleting file => " + file.delete());
         }
         if (rootObjectManager.existsObject(objectName)) {
-            rootObjectManager.removeObject(objectName);
+            rootObjectManager.removeObject(objectName, false);
+        }
+
+        if (rootObjectManager.existsObject(folderName)) {
+            rootObjectManager.removeObject(folderName, true);
         }
     }
 
