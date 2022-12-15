@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -201,9 +202,10 @@ class AwsDataObjectServiceTests {
         dataObjectService.createObject(objectName, testFile);
         assertTrue(dataObjectService.existsObject(objectName));
         String presignedUrl;
+        var presignedUrlExpirationTime = Optional.of(10L);
 
         //when
-        presignedUrl = dataObjectService.getPresignedUrl(objectName, 60);
+        presignedUrl = dataObjectService.getPresignedUrl(objectName, presignedUrlExpirationTime);
 
         //then
         assertNotNull(presignedUrl);
@@ -214,10 +216,11 @@ class AwsDataObjectServiceTests {
         //given
         assertTrue(dataObjectService.existsRootObject(rootObjectName));
         var notExistingObjectName = "notExistingObject.png";
+        var presignedUrlExpirationTime = Optional.of(10L);
         assertFalse(dataObjectService.existsObject(notExistingObjectName));
 
         //then
-        assertThrows(ObjectNotFoundException.class, () -> dataObjectService.getPresignedUrl(notExistingObjectName, 60));
+        assertThrows(ObjectNotFoundException.class, () -> dataObjectService.getPresignedUrl(notExistingObjectName, presignedUrlExpirationTime));
     }
 
     // Remove Object

@@ -16,15 +16,18 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
 public class AwsDataObjectService {
 
+    public static final long MIN_EXPIRATION_IN_SECONDS = 90;
+    private static final Logger LOG = Logger.getLogger(AwsDataObjectService.class.getName());
+
     private final AwsCredentialsProvider credentialsProvider;
     private final Region region;
-    private static final Logger LOG = Logger.getLogger(AwsDataObjectService.class.getName());
     private final S3Client s3;
     private final String rootObjectName;
 
@@ -195,8 +198,9 @@ public class AwsDataObjectService {
         }
     }
 
-    public String getPresignedUrl(String objectName, long expirationTimeinSeconds) {
-        if (expirationTimeinSeconds <= 0) {
+    public String getPresignedUrl(String objectName, Optional<Long> expirationTimeinSeconds) {
+        long expiration = expirationTimeinSeconds.orElse(MIN_EXPIRATION_IN_SECONDS);
+        if (expiration <= 0) {
             throw new IllegalArgumentException("Expiration time must be greater than 0");
         }
 
@@ -213,7 +217,7 @@ public class AwsDataObjectService {
                     .key(objectName)
                     .build();
             GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(java.time.Duration.ofSeconds(expirationTimeinSeconds))
+                    .signatureDuration(java.time.Duration.ofSeconds(expiration))
                     .getObjectRequest(getObjectRequest)
                     .build();
             return presigner.presignGetObject(getObjectPresignRequest).url().toString();
