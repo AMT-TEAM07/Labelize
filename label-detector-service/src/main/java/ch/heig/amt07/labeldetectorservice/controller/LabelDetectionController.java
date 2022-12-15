@@ -1,15 +1,15 @@
 package ch.heig.amt07.labeldetectorservice.controller;
 
-import ch.heig.amt07.labeldetectorservice.service.LabelWrapper;
 import ch.heig.amt07.labeldetectorservice.utils.AnalyzeParams;
 import ch.heig.amt07.labeldetectorservice.utils.LabelModelAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ch.heig.amt07.labeldetectorservice.service.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 public class LabelDetectionController{
@@ -30,7 +30,9 @@ public class LabelDetectionController{
             MyLabel temp = new MyLabel(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
             return assembler.toModel(new LabelModel(temp));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage()
+            );
         }
     }
 
