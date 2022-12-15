@@ -23,15 +23,12 @@ public class LabelDetectionController{
 
     @PostMapping("/analyze/url")
     public EntityModel<LabelModel> analyzeFromUrl(@RequestBody AnalyzeParams params) {
-        /*List<EntityModel<LabelWrapper>> labels = labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence())
-                .stream().map(EntityModel::of).toList();
-        return CollectionModel.of(labels, linkTo(methodOn(LabelDetectionController.class).analyzeFromB64(params)).withRel("Base64"));*/
         try{
             MyLabel temp = new MyLabel(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
             return assembler.toModel(new LabelModel(temp));
         } catch (IOException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, e.getMessage()
+                    HttpStatus.BAD_REQUEST, e.getMessage()
             );
         }
     }
