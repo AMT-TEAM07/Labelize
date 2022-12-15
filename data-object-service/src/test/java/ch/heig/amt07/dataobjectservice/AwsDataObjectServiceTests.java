@@ -4,8 +4,6 @@ import ch.heig.amt07.dataobjectservice.exception.NotEmptyException;
 import ch.heig.amt07.dataobjectservice.exception.ObjectAlreadyExistsException;
 import ch.heig.amt07.dataobjectservice.exception.ObjectNotFoundException;
 import ch.heig.amt07.dataobjectservice.service.AwsDataObjectService;
-import ch.heig.amt07.dataobjectservice.utils.AwsConfigProvider;
-import com.sun.tools.javac.Main;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +15,12 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class AwsDataObjectServiceTests {
 
-    private static final Logger LOG = Logger.getLogger(Main.class.getName());
     private AwsDataObjectService dataObjectService;
     private String rootObjectName;
     private byte[] testFile;
@@ -49,13 +44,12 @@ class AwsDataObjectServiceTests {
         try {
             testFile = Files.readAllBytes(testImagePath);
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage());
+            System.out.println(e.getMessage());
         }
 
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
 
-        var configProvider = new AwsConfigProvider("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
-        dataObjectService = new AwsDataObjectService(configProvider, rootObjectName);
+        dataObjectService = new AwsDataObjectService("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION", rootObjectName);
     }
 
     // DoesExist
@@ -178,7 +172,7 @@ class AwsDataObjectServiceTests {
         try {
             file = Files.readAllBytes(downloadedImagePath);
         } catch(Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage());
+            System.out.println(e.getMessage());
         }
         assertTrue(file.length > 0);
         assertArrayEquals(file, testFile);
@@ -311,7 +305,7 @@ class AwsDataObjectServiceTests {
     void tearDown() {
         File file = new File(downloadedImagePath.toUri());
         if (file.exists()) {
-            LOG.log(Level.INFO, "{0}", "Deleting file => " + file.delete());
+            assertTrue(file.delete());
         }
 
         if (dataObjectService.existsObject(objectName)) {
