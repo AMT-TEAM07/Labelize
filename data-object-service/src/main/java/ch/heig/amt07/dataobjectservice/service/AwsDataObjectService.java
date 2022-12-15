@@ -32,7 +32,7 @@ public class AwsDataObjectService {
         this("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION", "AWS_BUCKET");
     }
 
-    public AwsDataObjectService(String accessKeyVar, String secretKeyVar, String regionVar, String rootObjectName) {
+    public AwsDataObjectService(String accessKeyVar, String secretKeyVar, String regionVar, String rootObjectNameVar) {
         Dotenv dotenv = Dotenv.configure()
                 .ignoreIfMissing()
                 .systemProperties()
@@ -41,7 +41,7 @@ public class AwsDataObjectService {
         credentialsProvider = StaticCredentialsProvider.create(credentials);
         region = Region.of(dotenv.get(regionVar));
 
-        this.rootObjectName = rootObjectName;
+        this.rootObjectName = dotenv.get(rootObjectNameVar);
         s3 = S3Client.builder()
                 .region(region)
                 .credentialsProvider(credentialsProvider)

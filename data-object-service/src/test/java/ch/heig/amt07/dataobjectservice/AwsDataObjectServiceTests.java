@@ -49,7 +49,7 @@ class AwsDataObjectServiceTests {
 
         downloadedImagePath = Paths.get("src", "test", "resources", "downloaded-" + objectName);
 
-        dataObjectService = new AwsDataObjectService("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION", rootObjectName);
+        dataObjectService = new AwsDataObjectService("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION", "TEST_AWS_BUCKET");
     }
 
     // DoesExist
