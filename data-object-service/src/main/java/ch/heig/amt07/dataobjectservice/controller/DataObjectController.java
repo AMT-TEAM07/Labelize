@@ -3,12 +3,18 @@ package ch.heig.amt07.dataobjectservice.controller;
 import ch.heig.amt07.dataobjectservice.exception.NotEmptyException;
 import ch.heig.amt07.dataobjectservice.exception.ObjectAlreadyExistsException;
 import ch.heig.amt07.dataobjectservice.exception.ObjectNotFoundException;
+import ch.heig.amt07.dataobjectservice.model.DataObjectResponse;
 import ch.heig.amt07.dataobjectservice.service.AwsDataObjectService;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("data-object")
@@ -20,14 +26,27 @@ public class DataObjectController {
     }
 
     @PostMapping("upload")
-    public ResponseEntity<String> upload(@RequestParam MultipartFile file) {
+    public ResponseEntity<EntityModel<DataObjectResponse>> upload(@RequestParam MultipartFile file) {
+        var response = new DataObjectResponse();
+        response.setObjectName(file.getOriginalFilename());
+
+        var selfLink = linkTo(methodOn(DataObjectController.class).upload(file)).withSelfRel();
+        var publishLink = linkTo(methodOn(DataObjectController.class)
+                .publish(file.getOriginalFilename(), Optional.empty())).withRel("publish");
+        var deleteLink = linkTo(methodOn(DataObjectController.class).delete(false, file.getOriginalFilename(), false)).withRel("delete");
+
+        var entity = EntityModel.of(response, selfLink, publishLink, deleteLink);
+
         try {
             dataObjectService.createObject(file.getOriginalFilename(), file.getBytes());
-            return ResponseEntity.ok().body("File uploaded successfully");
+            response.setMessage("Object successfully uploaded");
+            return ResponseEntity.status(HttpStatus.CREATED).body(entity);
         } catch (ObjectAlreadyExistsException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            response.setMessage("Object already exists");
+            return ResponseEntity.badRequest().body(entity);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            response.setMessage("Error while uploading object");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(entity);
         }
     }
 
@@ -44,7 +63,7 @@ public class DataObjectController {
         }
     }
 
-    @DeleteMapping("delete")
+    @DeleteMapping()
     public ResponseEntity<String> delete(@RequestParam Boolean isRootObject, @RequestParam String objectName, Boolean recursive) {
         try {
             if (isRootObject) {
