@@ -1,7 +1,9 @@
 package ch.heig.amt07.labeldetectorservice.controller;
 
-import ch.heig.amt07.labeldetectorservice.utils.AnalyzeParams;
-import ch.heig.amt07.labeldetectorservice.utils.LabelModelAssembler;
+import ch.heig.amt07.labeldetectorservice.dto.LabelList;
+import ch.heig.amt07.labeldetectorservice.model.LabelModel;
+import ch.heig.amt07.labeldetectorservice.dto.AnalyzeParams;
+import ch.heig.amt07.labeldetectorservice.assembler.LabelModelAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,7 @@ public class LabelDetectionController{
     @PostMapping("/analyze/url")
     public EntityModel<LabelModel> analyzeFromUrl(@RequestBody AnalyzeParams params) {
         try{
-            MyLabel temp = new MyLabel(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
+            LabelList temp = new LabelList(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
             return assembler.toModel(new LabelModel(temp));
         } catch (IOException e) {
             throw new ResponseStatusException(
@@ -35,7 +37,7 @@ public class LabelDetectionController{
 
     @PostMapping("/analyze/b64")
     public EntityModel<LabelModel> analyzeFromB64(@RequestBody AnalyzeParams params) {
-        MyLabel temp = new MyLabel(labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence()));
+        LabelList temp = new LabelList(labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence()));
         return assembler.toModel(new LabelModel(temp));
     }
 }

@@ -1,5 +1,6 @@
 package ch.heig.amt07.labeldetectorservice.service;
 
+import ch.heig.amt07.labeldetectorservice.dto.LabelWrapper;
 import ch.heig.amt07.labeldetectorservice.utils.AwsConfigProvider;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.SdkBytes;

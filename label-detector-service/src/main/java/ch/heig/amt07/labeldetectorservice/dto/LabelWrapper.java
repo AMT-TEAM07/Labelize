@@ -1,4 +1,4 @@
-package ch.heig.amt07.labeldetectorservice.service;
+package ch.heig.amt07.labeldetectorservice.dto;
 
 import org.springframework.hateoas.server.core.Relation;
 import software.amazon.awssdk.services.rekognition.model.Label;

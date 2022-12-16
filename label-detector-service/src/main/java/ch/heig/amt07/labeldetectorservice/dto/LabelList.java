@@ -1,16 +1,15 @@
-package ch.heig.amt07.labeldetectorservice.service;
+package ch.heig.amt07.labeldetectorservice.dto;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public record MyLabel (List<LabelWrapper> labels) {
+public record LabelList(List<LabelWrapper> labels) {
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MyLabel myLabel = (MyLabel) o;
+        LabelList myLabel = (LabelList) o;
         return labels.equals(myLabel.labels);
     }
 

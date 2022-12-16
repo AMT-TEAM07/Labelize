@@ -1,4 +1,4 @@
-package ch.heig.amt07.labeldetectorservice.utils;
+package ch.heig.amt07.labeldetectorservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

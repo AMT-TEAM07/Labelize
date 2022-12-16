@@ -1,7 +1,8 @@
-package ch.heig.amt07.labeldetectorservice.utils;
+package ch.heig.amt07.labeldetectorservice.assembler;
 
 import ch.heig.amt07.labeldetectorservice.controller.LabelDetectionController;
-import ch.heig.amt07.labeldetectorservice.service.LabelModel;
+import ch.heig.amt07.labeldetectorservice.dto.AnalyzeParams;
+import ch.heig.amt07.labeldetectorservice.model.LabelModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
@@ -16,8 +17,8 @@ public class LabelModelAssembler implements RepresentationModelAssembler<LabelMo
     public EntityModel<LabelModel> toModel(LabelModel entities) {
         return EntityModel.of(entities, linkTo(methodOn(LabelDetectionController.class).analyzeFromUrl(
                 new AnalyzeParams("randomImage", Optional.empty(), Optional.empty())
-        )).withRel("url"), linkTo(methodOn(LabelDetectionController.class).analyzeFromB64(
+        )).withRel("analyzeUrl"), linkTo(methodOn(LabelDetectionController.class).analyzeFromB64(
                 new AnalyzeParams("randomImage", Optional.empty(), Optional.empty())
-        )).withRel("base64"));
+        )).withRel("analyzeBase64"));
     }
 }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import ch.heig.amt07.labeldetectorservice.service.AwsLabelDetectorHelper;
-import ch.heig.amt07.labeldetectorservice.service.LabelWrapper;
+import ch.heig.amt07.labeldetectorservice.dto.LabelWrapper;
 import ch.heig.amt07.labeldetectorservice.utils.AwsConfigProvider;
 import org.junit.jupiter.api.BeforeEach;
 
