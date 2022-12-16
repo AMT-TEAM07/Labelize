@@ -15,10 +15,10 @@ import java.io.IOException;
 
 @RestController
 public class LabelDetectionController{
-    private final AwsLabelDetectorHelper labelDetector;
+    private final AwsLabelDetector labelDetector;
     private final LabelModelAssembler assembler;
 
-    public LabelDetectionController(AwsLabelDetectorHelper labelDetector) {
+    public LabelDetectionController(AwsLabelDetector labelDetector) {
         this.labelDetector = labelDetector;
         this.assembler = new LabelModelAssembler();
     }
