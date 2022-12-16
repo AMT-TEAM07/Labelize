@@ -1,4 +1,4 @@
-package ch.heig.amt07.dataobjectservice.model;
+package ch.heig.amt07.dataobjectservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
