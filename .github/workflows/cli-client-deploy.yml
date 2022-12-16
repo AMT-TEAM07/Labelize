@@ -1,17 +1,9 @@
-name: Deploy on Docker Hub - CLI Client
+name: "Deploy on Docker Hub - CLI Client"
 on:
   workflow_run:
     workflows: [Verify & Package - CLI Client]
-    branches:
-      - main
-    types:
-      - completed
-    paths:
-      - "cli-client/**"
-      - ".github/workflows/cli-client-deploy.yml"
-defaults:
-  run:
-    working-directory: cli-client
+    branches: [main]
+    types: [completed]
 jobs:
   deploy:
     runs-on: ubuntu-22.04

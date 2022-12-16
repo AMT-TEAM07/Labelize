@@ -1,8 +1,12 @@
 package ch.heig.amt07.labeldetectorservice.service;
 
-import ch.heig.amt07.labeldetectorservice.utils.AwsConfigProvider;
+import ch.heig.amt07.labeldetectorservice.dto.LabelWrapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
@@ -15,17 +19,32 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class AwsLabelDetectorHelper {
+public class AwsLabelDetector {
 
     private final RekognitionClient rekClient;
     public final int MAX_LABELS = 10;
     public final double MIN_CONFIDENCE = 90.0;
 
-    public AwsLabelDetectorHelper(AwsConfigProvider configProvider) {
+    public AwsLabelDetector(String accessKeyVariable, String secretKeyVariable, String regionVariable) {
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .systemProperties()
+                .load();
+
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(dotenv.get(accessKeyVariable),
+                dotenv.get(secretKeyVariable));
+
+        var credentialsProvider = StaticCredentialsProvider.create(credentials);
+        var region = Region.of(dotenv.get(regionVariable));
         rekClient = RekognitionClient.builder()
-                .region(configProvider.getRegion())
-                .credentialsProvider(configProvider.getCredentialsProvider())
+                .region(region)
+                .credentialsProvider(credentialsProvider)
                 .build();
+
+    }
+
+    public AwsLabelDetector() {
+        this("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION");
     }
 
     public List<LabelWrapper> execute(String imageUri, Optional<Integer> nbLabels, Optional<Double> minConfidence) throws IOException {

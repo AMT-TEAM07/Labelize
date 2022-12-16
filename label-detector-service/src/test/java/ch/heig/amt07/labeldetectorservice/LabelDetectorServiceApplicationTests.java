@@ -3,9 +3,8 @@ package ch.heig.amt07.labeldetectorservice;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import ch.heig.amt07.labeldetectorservice.service.AwsLabelDetectorHelper;
-import ch.heig.amt07.labeldetectorservice.service.LabelWrapper;
-import ch.heig.amt07.labeldetectorservice.utils.AwsConfigProvider;
+import ch.heig.amt07.labeldetectorservice.service.AwsLabelDetector;
+import ch.heig.amt07.labeldetectorservice.dto.LabelWrapper;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
@@ -18,12 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 class LabelDetectorServiceApplicationTests {
 
-	private AwsLabelDetectorHelper labelDetectorHelper;
+	private AwsLabelDetector labelDetectorHelper;
 
 	@BeforeEach
 	public void setup() {
-		var configProvider = new AwsConfigProvider("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
-		labelDetectorHelper = new AwsLabelDetectorHelper(configProvider);
+		labelDetectorHelper = new AwsLabelDetector("TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY", "TEST_AWS_DEFAULT_REGION");
 	}
 
 	@Test

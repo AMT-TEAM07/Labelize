@@ -1,9 +1,6 @@
-name: Verify & Package - CLI Client
+name: "Verify & Package - CLI Client"
 on:
   push:
-    branches:
-      - main
-      - dev
     paths:
       - "cli-client/**"
       - ".github/workflows/cli-client-verify.yml"

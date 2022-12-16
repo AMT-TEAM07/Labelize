@@ -1,9 +1,6 @@
-name: Verify & Package - Label Detector Service
+name: "Verify & Package - Label Detector Service"
 on:
   push:
-    branches:
-      - main
-      - dev
     paths:
       - "label-detector-service/**"
       - ".github/workflows/label-detector-verify.yml"

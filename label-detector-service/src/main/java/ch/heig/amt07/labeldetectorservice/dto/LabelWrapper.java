@@ -1,9 +1,11 @@
-package ch.heig.amt07.labeldetectorservice.service;
+package ch.heig.amt07.labeldetectorservice.dto;
 
+import org.springframework.hateoas.server.core.Relation;
 import software.amazon.awssdk.services.rekognition.model.Label;
 
 import java.util.ArrayList;
 import java.util.List;
+@Relation(collectionRelation = "labels")
 public class LabelWrapper {
     private final String name;
     private final double confidence;

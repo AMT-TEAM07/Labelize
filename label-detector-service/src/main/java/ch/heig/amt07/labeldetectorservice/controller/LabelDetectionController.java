@@ -1,28 +1,43 @@
 package ch.heig.amt07.labeldetectorservice.controller;
 
-import ch.heig.amt07.labeldetectorservice.service.LabelWrapper;
-import ch.heig.amt07.labeldetectorservice.utils.AnalyzeParams;
+import ch.heig.amt07.labeldetectorservice.dto.LabelList;
+import ch.heig.amt07.labeldetectorservice.model.LabelModel;
+import ch.heig.amt07.labeldetectorservice.dto.AnalyzeParams;
+import ch.heig.amt07.labeldetectorservice.assembler.LabelModelAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ch.heig.amt07.labeldetectorservice.service.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.List;
+
 
 @RestController
-class LabelDetectionController{
-    private final AwsLabelDetectorHelper labelDetector;
+public class LabelDetectionController{
+    private final AwsLabelDetector labelDetector;
+    private final LabelModelAssembler assembler;
 
-    public LabelDetectionController(AwsLabelDetectorHelper labelDetector) {
+    public LabelDetectionController(AwsLabelDetector labelDetector) {
         this.labelDetector = labelDetector;
+        this.assembler = new LabelModelAssembler();
     }
 
     @PostMapping("/analyze/url")
-    List<LabelWrapper> analyzeFromUrl(@RequestBody AnalyzeParams params) throws IOException {
-        return labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence());
+    public EntityModel<LabelModel> analyzeFromUrl(@RequestBody AnalyzeParams params) {
+        try{
+            LabelList temp = new LabelList(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
+            return assembler.toModel(new LabelModel(temp));
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage()
+            );
+        }
     }
 
     @PostMapping("/analyze/b64")
-    List<LabelWrapper> analyzeFromB64(@RequestBody AnalyzeParams params) throws IOException {
-        return labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence());
+    public EntityModel<LabelModel> analyzeFromB64(@RequestBody AnalyzeParams params) {
+        LabelList temp = new LabelList(labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence()));
+        return assembler.toModel(new LabelModel(temp));
     }
 }

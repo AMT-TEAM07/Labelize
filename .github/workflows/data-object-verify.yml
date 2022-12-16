@@ -1,4 +1,4 @@
-name: "Verify Data Object Service"
+name: "Verify & Package - Data Object Service"
 on:
   push:
     paths:
