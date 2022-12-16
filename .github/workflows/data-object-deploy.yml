@@ -21,7 +21,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          path: data-object-service
           context: data-object-service/.
           target: production
           file: data-object-service/Dockerfile

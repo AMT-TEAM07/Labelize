@@ -21,7 +21,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          path: label-detector-service
           context: label-detector-service/.
           target: production
           file: label-detector-service/Dockerfile
