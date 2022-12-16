@@ -82,27 +82,40 @@ public class DataObjectController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<String> delete(@RequestParam Boolean isRootObject, @RequestParam String objectName, Boolean recursive) {
+    public ResponseEntity<EntityModel<DataObjectResponse>> delete(@RequestParam Boolean isRootObject, @RequestParam String objectName, Boolean recursive) {
+        var response = new DataObjectResponse();
+        response.setObjectName(objectName);
+
+        var selfLink = linkTo(methodOn(DataObjectController.class).delete(isRootObject, objectName, recursive)).withSelfRel();
+        var uploadLink = linkTo(methodOn(DataObjectController.class).upload(null)).withRel("upload");
+        var publishLink = linkTo(methodOn(DataObjectController.class).publish(objectName, Optional.empty())).withRel("publish");
+
+        var entity = EntityModel.of(response, selfLink, uploadLink, publishLink);
+
         try {
             if (isRootObject) {
                 if (dataObjectService.existsRootObject(objectName)) {
                     dataObjectService.removeRootObject(objectName, recursive);
-                    return ResponseEntity.ok().body("Root object deleted successfully");
+                    response.setMessage("Root object successfully deleted");
+                    return ResponseEntity.ok().body(entity);
                 } else {
                     return ResponseEntity.notFound().build();
                 }
             } else {
                 if (dataObjectService.existsObject(objectName)) {
                     dataObjectService.removeObject(objectName, recursive);
-                    return ResponseEntity.ok().body("Object deleted successfully");
+                    response.setMessage("Object successfully deleted");
+                    return ResponseEntity.ok().body(entity);
                 } else {
                     return ResponseEntity.notFound().build();
                 }
             }
         } catch (NotEmptyException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            response.setMessage("Object is not empty");
+            return ResponseEntity.badRequest().body(entity);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            response.setMessage("Error while deleting object");
+            return ResponseEntity.internalServerError().body(entity);
         }
     }
 }

@@ -58,7 +58,7 @@ public class AwsDataObjectService {
         try {
             s3.headBucket(headBucketRequest);
             return true;
-        } catch (NoSuchBucketException e) {
+        } catch (S3Exception e) {
             LOG.log(Level.INFO, "{0}", e.getMessage());
             return false;
         }
