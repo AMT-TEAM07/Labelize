@@ -35,20 +35,29 @@ public class LabelizeClient {
     private static final Logger LOG = Logger.getLogger(LabelizeClient.class.getName());
     private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: ";
 
-    private LabelizeClient() {
+    private String dataObjectApiUrl;
+    private String analyzeApiUrl;
+
+    private String rootObjectName;
+
+    public LabelizeClient() {
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .systemProperties()
+                .load();
+
+        this.rootObjectName = dotenv.get("AWS_BUCKET");
+        this.dataObjectApiUrl = dotenv.get("DATA_OBJECT_API_URL");
+        this.analyzeApiUrl = dotenv.get("ANALYZE_API_URL");
     }
 
-    public static void runScenarioOne() {
+    public void runScenarioOne() {
         LOG.log(Level.INFO, "Starting scenario 1");
 
         /*
         GIVEN
          */
-        Dotenv dotenv = Dotenv.configure()
-                .ignoreIfMissing()
-                .systemProperties()
-                .load();
-        assertDoesNotThrow(() -> removeRootObject(dotenv.get("AWS_BUCKET")));
+        assertDoesNotThrow(() -> removeRootObject(rootObjectName));
 
         var fileName = "lausanne.jpg";
         var jsonName = "lausanne.jpg.json";
@@ -80,7 +89,7 @@ public class LabelizeClient {
         // Analyze the image using the signed url
         jsonStr = String.format(jsonStr, signedUrl.get());
         var finalJsonStr = jsonStr;
-        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "url")));
+        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "/url")));
         assert (!analysis.get().isEmpty());
 
         // Send result as json to the bucket
@@ -98,7 +107,7 @@ public class LabelizeClient {
         LOG.log(Level.INFO, "Ending scenario 1");
     }
 
-    public static void runScenarioTwo() {
+    public void runScenarioTwo() {
         LOG.log(Level.INFO, "Starting scenario 2");
 
         /*
@@ -135,7 +144,7 @@ public class LabelizeClient {
         // Analyze the image using the signed url
         jsonStr = String.format(jsonStr, signedUrl.get());
         var finalJsonStr = jsonStr;
-        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "url")));
+        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "/url")));
         assert (!analysis.get().isEmpty());
 
         // Send result as json to the bucket
@@ -153,7 +162,7 @@ public class LabelizeClient {
         LOG.log(Level.INFO, "Ending scenario 2");
     }
 
-    public static void runScenarioThree() {
+    public void runScenarioThree() {
         LOG.log(Level.INFO, "Starting scenario 3");
 
         /*
@@ -192,7 +201,7 @@ public class LabelizeClient {
         // Analyze the image using the signed url
         jsonStr = String.format(jsonStr, signedUrl.get());
         var finalJsonStr = jsonStr;
-        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "url")));
+        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "/url")));
         assert (!analysis.get().isEmpty());
 
         // Send result as json to the bucket
@@ -210,38 +219,38 @@ public class LabelizeClient {
         LOG.log(Level.INFO, "Ending scenario 3");
     }
 
-    private static HttpRequest createAnalyzeRequest(String jsonStr, String endpoint) throws URISyntaxException {
+    private HttpRequest createAnalyzeRequest(String jsonStr, String endpoint) throws URISyntaxException {
         return HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8081/analyze/" + endpoint))
+                .uri(new URI(analyzeApiUrl + endpoint))
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonStr))
                 .build();
     }
 
-    private static HttpRequest createUploadRequest(Path objectPath, String mediatype) throws IOException {
+    private HttpRequest createUploadRequest(Path objectPath, String mediatype) throws IOException {
         var fileName = objectPath.getFileName().toString();
 
         var multipartBody = MultipartBodyPublisher.newBuilder()
                 .formPart("file", fileName, MoreBodyPublishers.ofMediaType(HttpRequest.BodyPublishers.ofFile(objectPath), MediaType.parse(mediatype)))
                 .build();
-        return MutableRequest.POST("http://localhost:8080/data-object/upload", multipartBody)
+        return MutableRequest.POST(dataObjectApiUrl + "/upload", multipartBody)
                 .headers("Content-Type", "multipart/form-data; boundary=" + multipartBody.boundary())
                 .build();
     }
 
-    private static HttpRequest createPublishRequest(String objectName, Optional<Long> expiration) throws URISyntaxException {
+    private HttpRequest createPublishRequest(String objectName, Optional<Long> expiration) throws URISyntaxException {
         var query = "?objectName=" + objectName;
         if (expiration.isPresent()) {
             query += "&expiration=" + expiration.get();
         }
 
         return HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/data-object/publish" + query))
+                .uri(new URI(dataObjectApiUrl + "/publish" + query))
                 .GET()
                 .build();
     }
 
-    private static void uploadObject(String objectName, String mediatype) throws IOException, InterruptedException {
+    private void uploadObject(String objectName, String mediatype) throws IOException, InterruptedException {
         var request = createUploadRequest(Paths.get(objectName), mediatype);
         var response = HttpClient.newBuilder()
                 .build()
@@ -255,7 +264,7 @@ public class LabelizeClient {
         }
     }
 
-    private static String publish(String objectName, Optional<Long> expiration) throws IOException, InterruptedException, URISyntaxException {
+    private String publish(String objectName, Optional<Long> expiration) throws IOException, InterruptedException, URISyntaxException {
         var request = createPublishRequest(objectName, expiration);
         var response = HttpClient.newBuilder()
                 .build()
@@ -275,7 +284,7 @@ public class LabelizeClient {
         return publishJsonNode.get("signed_url").asText();
     }
 
-    private static String analyze(String signedUrl, String endpoint) throws IOException, InterruptedException, URISyntaxException {
+    private String analyze(String signedUrl, String endpoint) throws IOException, InterruptedException, URISyntaxException {
         var request = createAnalyzeRequest(signedUrl, endpoint);
         var response = HttpClient.newBuilder()
                 .build()
@@ -294,10 +303,10 @@ public class LabelizeClient {
         return jsonStr;
     }
 
-    private static void removeRootObject(String rootObjectName) throws IOException, InterruptedException {
+    private void removeRootObject(String rootObjectName) throws IOException, InterruptedException {
         LOG.log(Level.INFO, "Removing root object {0}", rootObjectName);
 
-        var url = "http://localhost:8080/data-object?isRootObject=true&objectName=" + rootObjectName + "&recursive=true";
+        var url = dataObjectApiUrl + "?isRootObject=true&objectName=" + rootObjectName + "&recursive=true";
 
         // Delete the uploaded file from the bucket
         var request = MutableRequest.create(url)
@@ -311,12 +320,12 @@ public class LabelizeClient {
         processStatusCode(rootObjectName, response);
     }
 
-    private static void cleanup(String fileName, String jsonName) throws IOException, InterruptedException {
+    private void cleanup(String fileName, String jsonName) throws IOException, InterruptedException {
 
         LOG.log(Level.INFO, "Start clean up of files from previous runs");
 
-        var fileUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + fileName + "&recursive=false";
-        var jsonUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + jsonName + "&recursive=false";
+        var fileUrl = dataObjectApiUrl + "?isRootObject=false&objectName=" + fileName + "&recursive=false";
+        var jsonUrl = dataObjectApiUrl + "?isRootObject=false&objectName=" + jsonName + "&recursive=false";
 
         // Delete the uploaded file from the bucket
         var request = MutableRequest.create(fileUrl)
@@ -340,7 +349,7 @@ public class LabelizeClient {
         processStatusCode(jsonName, response);
     }
 
-    private static void processStatusCode(String fileName, HttpResponse<String> response) {
+    private void processStatusCode(String fileName, HttpResponse<String> response) {
         switch (response.statusCode()) {
             case 200 -> LOG.log(Level.INFO, "{0} deleted successfully", fileName);
             case 400 -> {
