@@ -10,7 +10,6 @@ import com.github.mizosoft.methanol.MoreBodyPublishers;
 import com.github.mizosoft.methanol.MultipartBodyPublisher;
 import com.github.mizosoft.methanol.MutableRequest;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class LabelizeClient {
 
@@ -114,33 +116,57 @@ public class LabelizeClient {
         // TODO
     }
 
-    public static void runScenarioTwo() throws IOException, InterruptedException, URISyntaxException {
-        // Upload local file to the bucket
+    public static void runScenarioTwo() {
+        /*
+        GIVEN
+         */
         var fileName = "montreux.jpg";
-        uploadFile(fileName, "image/jpg");
+        var jsonName = "montreux.jpg.json";
 
-        // Retrieve a signed url of the uploaded file
-        var signedUrl = publish(fileName, Optional.empty());
+        var mediaType = "image/jpg";
+        var jsonMediaType = "application/json";
 
-        // Analyze the image using the signed url
-        var jsonStr = String.format("""
+        var jsonStr = """
                 {
                     "image": "%s",
                     "maxLabels": 50,
                     "minConfidence": 55.7
-                }""", signedUrl);
-        var analysis = analyze(jsonStr, "url");
+                }""";
+
+        AtomicReference<String> signedUrl = new AtomicReference<>("");
+        AtomicReference<String> analysis = new AtomicReference<>("");
+
+        /*
+        WHEN
+         */
+
+        // Upload local file to the bucket
+        assertDoesNotThrow(() -> uploadFile(fileName, mediaType));
+
+        // Retrieve a signed url of the uploaded file
+        assertDoesNotThrow(() -> signedUrl.set(publish(fileName, Optional.empty())));
+        assert (!signedUrl.get().isEmpty());
+
+        // Analyze the image using the signed url
+        jsonStr = String.format(jsonStr, signedUrl.get());
+        var finalJsonStr = jsonStr;
+        assertDoesNotThrow(() -> analysis.set(analyze(finalJsonStr, "url")));
+        assert (!analysis.get().isEmpty());
 
         // Send result as json to the bucket
-        var jsonNamePath = Paths.get("montreux.jpg.json");
-        Files.writeString(jsonNamePath, analysis, StandardCharsets.UTF_8);
-        uploadFile(jsonNamePath.getFileName().toString(), "application/json");
+        assertDoesNotThrow(() -> Files.writeString(Paths.get(jsonName), analysis.get(), StandardCharsets.UTF_8));
+        assert (Files.exists(Paths.get(jsonName)));
+        assertDoesNotThrow(() -> uploadFile(jsonName, jsonMediaType));
+
+        /*
+        THEN
+         */
 
         // Delete the json file locally
-        Files.delete(jsonNamePath);
+        assertDoesNotThrow(() -> Files.delete(Paths.get(jsonName)));
     }
 
-    public static void runScenarioThree() throws IOException, InterruptedException, URISyntaxException {
+    public static void runScenarioThree(){
         // TODO
     }
 }
