@@ -122,6 +122,8 @@ public class LabelizeClient {
     }
 
     public static void runScenarioTwo() {
+        LOG.log(Level.INFO, "Starting scenario 2");
+
         /*
         GIVEN
          */
@@ -170,9 +172,14 @@ public class LabelizeClient {
 
         // Delete the json file locally
         assertDoesNotThrow(() -> Files.delete(Paths.get(jsonName)));
+
+        LOG.log(Level.INFO, "Ending scenario 2");
     }
 
     private static void cleanup(String fileName, String jsonName) throws IOException, InterruptedException {
+
+        LOG.log(Level.INFO, "Start clean up of files from previous runs");
+
         var fileUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + fileName + "&recursive=false";
         var jsonUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + jsonName + "&recursive=false";
 
