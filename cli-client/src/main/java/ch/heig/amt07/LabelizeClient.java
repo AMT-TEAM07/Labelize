@@ -9,6 +9,7 @@ import com.github.mizosoft.methanol.MediaType;
 import com.github.mizosoft.methanol.MoreBodyPublishers;
 import com.github.mizosoft.methanol.MultipartBodyPublisher;
 import com.github.mizosoft.methanol.MutableRequest;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.net.URI;
@@ -43,8 +44,11 @@ public class LabelizeClient {
         /*
         GIVEN
          */
-
-        // removeRootObject();
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .systemProperties()
+                .load();
+        assertDoesNotThrow(() -> removeRootObject(dotenv.get("AWS_BUCKET")));
 
         var fileName = "lausanne.jpg";
         var jsonName = "lausanne.jpg.json";
