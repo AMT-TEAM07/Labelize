@@ -30,11 +30,22 @@ Ce projet est la version microservice de [PictureLabelizer](https://github.com/A
 - [ ] [Google Cloud](https://cloud.google.com/?hl=fr)
 
 ## Structure du repository
-Nous avons fait le choix de n'avoir qu'un seul repository pour l'ensemble du projet. Malgré le fait que nous ayons 3 projets distincts: `data-object-service`, `label-detector-service` et `cli-client`. Nous avons adapté le CI/CD pour qu'il ne lance les tests uniquement sur la partie modifiée lors du dernier commit afin d'éviter de lancer les tests sur les 3 projets à chaque commit.
+Nous avons fait le choix de n'avoir qu'un seul repository pour l'ensemble du projet. Malgré le fait que nous ayons 3 projets distincts: `data-object-service`, `label-detector-service` et `cli-client`. Le `data-object-service` gère toute la partie de stockage d'objet, le `label-detector-service` gère la partie d'analyse d'images et le `cli-client` fait le lien entre les deux micro-services en utilisant leur API REST.
+
+Nous avons adapté le CI/CD pour qu'il ne lance les tests uniquement sur la partie modifiée lors du dernier commit afin d'éviter de lancer les tests sur tous les projets à chaque commit.
 
 ## Wiki
 
 Le [wiki](https://github.com/AMT-TEAM07/Labelize/wiki) du projet regroupe toutes les informations nécessaires pour comprendre notre méthodologie de travail, nos choix et la documentation utilisée pour implémenter notre projet.
+
+## Docker
+Dans repository, nous avons créé un fichier `docker-compose.yml` qui permet de lancer les deux micro-services. Pour cela, il faut se placer à la racine du dossier `docker-compose` et lancer la commande suivante:
+
+```bash
+docker-compose -f docker-compose.prod up
+```
+
+Cela lancera `data-object-service` et `label-detector-service` sur les ports `8080` et `8081` respectivement.
 
 ## Prérequis
 
