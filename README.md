@@ -18,16 +18,19 @@
 
 ## Description
 
-
 Ce projet est une application Java permettant de détecter des labels sur une image fournie. Il s'agit d'une application découpée en plusieurs micro-services. De plus, cette application est conçue afin d'être capable d'utiliser plusieurs providers clouds pour la reconnaissance d'images et le stockage des données.
 
 Ce projet est la version microservice de [PictureLabelizer](https://github.com/AMT-TEAM07/PictureLabelizer).
 
-### Providers cloud supportés
+
+## Providers cloud supportés
 
 - [x] [AWS](https://aws.amazon.com/fr/) (🚧 développement en cours 🚧)
 - [ ] [Azure](https://azure.microsoft.com/fr-fr/)
 - [ ] [Google Cloud](https://cloud.google.com/?hl=fr)
+
+## Structure du repository
+Nous avons fait le choix de n'avoir qu'un seul repository pour l'ensemble du projet. Malgré le fait que nous ayons 3 projets distincts: `data-object-service`, `label-detector-service` et `cli-client`. Nous avons adapté le CI/CD pour qu'il ne lance les tests uniquement sur la partie modifiée lors du dernier commit afin d'éviter de lancer les tests sur les 3 projets à chaque commit.
 
 ## Wiki
 
@@ -75,3 +78,6 @@ Pour `label-detector-service`, il faut les variables d'environnement suivantes:
 Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter les fichiers `.env.example` qui sont à la racines dedits projets.
 
 ## Mise en route
+Afin de simplifier la mise en route des deux micro-services, nous avons créé un README dédié à chacun d'entre eux. Vous pouvez les consulter en cliquant sur les liens suivants:
+* [Mise en route de la partie data-object-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
+* [Mise en route de la partie label-detection-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
