@@ -23,10 +23,15 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class LabelizeClient {
 
+    private static final Logger LOG = Logger.getLogger(LabelizeClient.class.getName());
+    private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: ";
     private LabelizeClient() {}
 
     public static HttpRequest createAnalyzeRequest(String jsonStr, String endpoint) throws URISyntaxException {
@@ -66,10 +71,10 @@ public class LabelizeClient {
                 .send(request, HttpResponse.BodyHandlers.ofString());
 
         switch (response.statusCode()) {
-            case 200, 201 -> System.out.println(fileName + " uploaded successfully");
+            case 200, 201 -> LOG.log(Level.INFO, "{0}", fileName + " uploaded successfully");
             case 400 -> throw new BadRequestException(response.body());
             case 500 -> throw new InternalServerErrorException(response.body());
-            default -> throw new HttpException("Unexpected status code: " + response.statusCode());
+            default -> throw new HttpException(UNEXPECTED_STATUS_CODE + response.statusCode());
         }
     }
 
@@ -80,11 +85,11 @@ public class LabelizeClient {
                 .send(request, HttpResponse.BodyHandlers.ofString());
 
         switch (response.statusCode()) {
-            case 200, 201 -> System.out.println(fileName + " published successfully");
+            case 200, 201 -> LOG.log(Level.INFO, "{0}", fileName + " published successfully");
             case 400 -> throw new BadRequestException(response.body());
             case 404 -> throw new NotFoundException(response.body());
             case 500 -> throw new InternalServerErrorException(response.body());
-            default -> throw new HttpException("Unexpected status code: " + response.statusCode());
+            default -> throw new HttpException(UNEXPECTED_STATUS_CODE + response.statusCode());
         }
 
         var jsonStr = response.body();
@@ -100,15 +105,15 @@ public class LabelizeClient {
                 .send(request, HttpResponse.BodyHandlers.ofString());
 
         switch (response.statusCode()) {
-            case 200 -> System.out.println("Analysis successful");
+            case 200 -> LOG.log(Level.INFO, "{0}", "Analysis successful");
             case 400 -> throw new BadRequestException(response.body());
             case 404 -> throw new NotFoundException(response.body());
             case 500 -> throw new InternalServerErrorException(response.body());
-            default -> throw new HttpException("Unexpected status code: " + response.statusCode());
+            default -> throw new HttpException(UNEXPECTED_STATUS_CODE + response.statusCode());
         }
 
         var jsonStr = response.body();
-        System.out.println(jsonStr);
+        LOG.log(Level.INFO, "{0}", jsonStr);
         return jsonStr;
     }
 

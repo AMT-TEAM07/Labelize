@@ -2,13 +2,13 @@ package ch.heig.amt07;
 
 public class Main {
     public static void main(String[] args) {
-        // Scénario 1: Le bucket et l'objet n'existent pas
+        // Scénario 1 : Le bucket et l'objet n'existent pas
         LabelizeClient.runScenarioOne();
 
-        // Scénario 2: Le bucket existe, mais pas l'objet
+        // Scénario 2 : Le bucket existe, mais pas l'objet
         LabelizeClient.runScenarioTwo();
 
-        // Scénario 3: Le bucket et l'objet existent
+        // Scénario 3 : Le bucket et l'objet existent
         LabelizeClient.runScenarioThree();
     }
 }
