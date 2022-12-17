@@ -113,7 +113,7 @@ public class LabelizeClient {
         }
 
         var jsonStr = response.body();
-        LOG.log(Level.INFO, "{0}", jsonStr);
+        LOG.log(Level.INFO, "Result of analysis : {0}", jsonStr);
         return jsonStr;
     }
 
@@ -127,6 +127,7 @@ public class LabelizeClient {
          */
         var fileName = "montreux.jpg";
         var jsonName = "montreux.jpg.json";
+        assertDoesNotThrow(() -> cleanup(fileName, jsonName));
 
         var mediaType = "image/jpg";
         var jsonMediaType = "application/json";
@@ -169,6 +170,42 @@ public class LabelizeClient {
 
         // Delete the json file locally
         assertDoesNotThrow(() -> Files.delete(Paths.get(jsonName)));
+    }
+
+    private static void cleanup(String fileName, String jsonName) throws IOException, InterruptedException {
+        var fileUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + fileName + "&recursive=false";
+        var jsonUrl = "http://localhost:8080/data-object?isRootObject=false&objectName=" + jsonName + "&recursive=false";
+
+        // Delete the uploaded file from the bucket
+        var request = MutableRequest.create(fileUrl)
+                .DELETE()
+                .build();
+
+        var response = HttpClient.newBuilder()
+                .build()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+
+        processStatusCode(fileName, response);
+
+        // Delete the json file from the bucket
+        request = MutableRequest.create(jsonUrl)
+                .DELETE()
+                .build();
+        response = HttpClient.newBuilder()
+                .build()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+
+        processStatusCode(jsonName, response);
+    }
+
+    private static void processStatusCode(String fileName, HttpResponse<String> response) {
+        switch (response.statusCode()) {
+            case 200 -> LOG.log(Level.INFO, "{0} deleted successfully", fileName);
+            case 400 -> throw new BadRequestException(response.body());
+            case 404 -> LOG.log(Level.INFO, "{0} is not in the bucket", fileName);
+            case 500 -> throw new InternalServerErrorException(response.body());
+            default -> throw new HttpException(UNEXPECTED_STATUS_CODE + response.statusCode());
+        }
     }
 
     public static void runScenarioThree(){
