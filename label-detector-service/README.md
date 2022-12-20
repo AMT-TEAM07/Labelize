@@ -116,3 +116,12 @@ Les attributs `maxLabels` et `minConfidence` sont optionnels. S'ils ne sont pas 
 
 - maxLabels: 10
 - minConfidence: 90.0
+
+### Réponse de l'API
+
+Il y a 3 code de réponse possibles:
+* 200: L'analyse a été effectuée avec succès
+* 400: La requête est invalide (soit car il manque l'attribue image dans le body de la requête, soit car l'attribut image est invalid car l'url n'est pas correcte).
+* 404: L'URL demandé n'existe pas
+
+
