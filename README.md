@@ -1,6 +1,8 @@
 # Labelize
 
-![labelize-logo](docs/labelize-logo.svg)
+<div align="center">
+  <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
+</div>
 
 ## Collaborateurs
 
