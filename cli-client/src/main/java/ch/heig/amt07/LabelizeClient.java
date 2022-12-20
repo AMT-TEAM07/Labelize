@@ -233,7 +233,7 @@ public class LabelizeClient {
         var multipartBody = MultipartBodyPublisher.newBuilder()
                 .formPart("file", fileName, MoreBodyPublishers.ofMediaType(HttpRequest.BodyPublishers.ofFile(objectPath), MediaType.parse(mediatype)))
                 .build();
-        return MutableRequest.POST(dataObjectApiUrl + "/upload", multipartBody)
+        return MutableRequest.POST(dataObjectApiUrl, multipartBody)
                 .headers("Content-Type", "multipart/form-data; boundary=" + multipartBody.boundary())
                 .build();
     }
@@ -245,7 +245,7 @@ public class LabelizeClient {
         }
 
         return HttpRequest.newBuilder()
-                .uri(new URI(dataObjectApiUrl + "/publish" + query))
+                .uri(new URI(dataObjectApiUrl + query))
                 .GET()
                 .build();
     }
