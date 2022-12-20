@@ -31,13 +31,13 @@ Optionnel mais fortement recommandé:
 
 ### Credentials
 
-Les credentials doivent figurer dans le fichier `.env` à la racine du dossier `label-detection-service`. Voici les différentes variables d'environnement qu'il faut renseigner:
+Les credentials doivent figurer dans le fichier `.env` à la racine du dossier `label-detector-service`. Voici les différentes variables d'environnement qu'il faut renseigner:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_DEFAULT_REGION`
 
-Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter le fichier `.env.example` qui est également à la racine du dossier `label-detection-service`.
+Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter le fichier `.env.example` qui est également à la racine du dossier `label-detector-service`.
 
 ## Mise en route
 
