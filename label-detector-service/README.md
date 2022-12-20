@@ -69,13 +69,15 @@ mvn test -Dtest=NomDeLaClasseTest
 
 ```bash
 # Package l'application
-mvn package
+mvn package -DskipTests
 
 # Lancer l'application
 java -jar target/*.jar
 ```
 
 ## Endpoints
+
+Les endpoints acceptent et retournent du `JSON`. Il faut donc spécifier le header `Content-Type: application/json` dans les requêtes.
 
 Voici les endpoints actuellement disponibles:
 
