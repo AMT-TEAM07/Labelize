@@ -94,4 +94,5 @@ Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est
 Afin de simplifier la mise en route des deux micro-services, nous avons créé un README dédié à chacun d'entre eux. Vous pouvez les consulter en cliquant sur les liens suivants:
 
 - [Mise en route de la partie data-object-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
-- [Mise en route de la partie label-detection-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
+- [Mise en route de la partie label-detector-service](https://github.com/AMT-TEAM07/Labelize/tree/main/label-detector-service/README.md)
+- [Mise en route de la partie cli-client](https://github.com/AMT-TEAM07/Labelize/tree/main/cli-client/README.md)
