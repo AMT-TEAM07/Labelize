@@ -27,8 +27,8 @@ services:
     profiles: ["client"]
     environment:
       - AWS_BUCKET=
-      - DATA_OBJECT_SERVICE_URL=http://data-object:8080/data-object
-      - LABEL_DETECTOR_SERVICE_URL=http://label-detector:8081/analyze
+      - DATA_OBJECT_API_URL=http://data-object:8080/v1/data-object-management/data-objects
+      - ANALYZE_API_URL=http://label-detector:8081/v1/label-detector-management/analyze
     depends_on:
       - data-object
       - label-detector
