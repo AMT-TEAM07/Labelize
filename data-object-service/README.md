@@ -1,8 +1,11 @@
-# Labelize : Service data-object
+# Labelize : data-object-service
 
 [![Verify & Package - Data Object Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-verify.yml) [![Deploy on Docker Hub - Data Object Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml)
 
 Ce micro-service fait parti du projet [Labelize](https://github.com/AMT-TEAM07/Labelize).
+
+Il s'agit d'une application Spring Boot mettant à disposition une API REST.
+
 Il est chargé de la gestion du stockage de data-objects dans des buckets S3 en utilisant le cloud AWS.
 Il permet le stockage, la suppression des data-objets et donne la possibilité de les récupérer avec des urls temporaires signées.
 

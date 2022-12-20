@@ -1,10 +1,12 @@
-# Label-detection-service
+# Labelize : label-detector-service
 
-[![Verify & Package - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml)
+[![Verify & Package - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml) [![Deploy on Docker Hub - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml)
 
-[![Deploy on Docker Hub - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml)
+Ce micro-service fait parti du projet [Labelize](https://github.com/AMT-TEAM07/Labelize).
 
-Bienvenue dans le README dédié au `label-detection-service`. Ce micro-service est chargé de l'analyse d'image. Il permet de détecter les labels présents sur une image.
+Il s'agit d'une application Spring Boot mettant à disposition une API REST.
+
+Ce micro-service est chargé de l'analyse d'image. Il permet de détecter les labels présents sur une image. Il s'appuie sur le service AWS Rekognition pour effectuer cette analyse.
 
 ## Prérequis
 
@@ -119,11 +121,10 @@ Les attributs `maxLabels` et `minConfidence` sont optionnels. S'ils ne sont pas 
 - maxLabels: 10
 - minConfidence: 90.0
 
-### Réponse de l'API
+### Réponses de l'API
 
-Il y a 3 code de réponse possibles:
-* 200: L'analyse a été effectuée avec succès
-* 400: La requête est invalide (soit car il manque l'attribue image dans le body de la requête, soit car l'attribut image est invalid car l'url n'est pas correcte).
-* 404: L'URL demandé n'existe pas
+Les 3 codes d'erreurs possibles:
 
-
+- 200: L'analyse a été effectuée avec succès
+- 400: La requête est invalide (soit car il manque l'attribue image dans le body de la requête, soit car l'attribut image est invalid car l'url n'est pas correcte).
+- 404: L'URL demandée n'existe pas
