@@ -4,6 +4,8 @@
   <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
 </div>
 
+[![Deploy on Docker Hub - Data Object Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml)[![Deploy on Docker Hub - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml)[![Deploy on Docker Hub - CLI Client](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-deploy.yml)
+
 ## Collaborateurs
 
 ### Product Owners
@@ -24,9 +26,13 @@ Ce projet est une application Java permettant de détecter des labels sur une im
 
 Ce projet est la version microservice de [PictureLabelizer](https://github.com/AMT-TEAM07/PictureLabelizer).
 
+## Wiki
+
+Le [wiki](https://github.com/AMT-TEAM07/Labelize/wiki) du projet regroupe toutes les informations nécessaires pour comprendre notre méthodologie de travail, nos choix et la documentation utilisée pour implémenter notre projet.
+
 ## Providers cloud supportés
 
-- [x] [AWS](https://aws.amazon.com/fr/) (🚧 développement en cours 🚧)
+- [x] [AWS](https://aws.amazon.com/fr/)
 - [ ] [Azure](https://azure.microsoft.com/fr-fr/)
 - [ ] [Google Cloud](https://cloud.google.com/?hl=fr)
 
@@ -35,10 +41,6 @@ Ce projet est la version microservice de [PictureLabelizer](https://github.com/A
 Nous avons fait le choix de n'avoir qu'un seul repository pour l'ensemble du projet. Malgré le fait que nous ayons 3 projets distincts: `data-object-service`, `label-detector-service` et `cli-client`. Le `data-object-service` gère toute la partie de stockage d'objet, le `label-detector-service` gère la partie d'analyse d'images et le `cli-client` fait le lien entre les deux micro-services en utilisant leur API REST.
 
 Nous avons adapté le CI/CD pour qu'il ne lance les tests uniquement sur la partie modifiée lors du dernier commit afin d'éviter de lancer les tests sur tous les projets à chaque commit.
-
-## Wiki
-
-Le [wiki](https://github.com/AMT-TEAM07/Labelize/wiki) du projet regroupe toutes les informations nécessaires pour comprendre notre méthodologie de travail, nos choix et la documentation utilisée pour implémenter notre projet.
 
 ## Docker
 
@@ -91,10 +93,12 @@ Pour `label-detector-service`, il faut les variables d'environnement suivantes:
 
 Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter les fichiers `.env.example` qui sont à la racines dedits projets.
 
-## Mise en route
+## Mises en routes locales
 
 Afin de simplifier la mise en route des deux micro-services, nous avons créé un README dédié à chacun d'entre eux. Vous pouvez les consulter en cliquant sur les liens suivants:
 
 - [Mise en route de la partie data-object-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
 - [Mise en route de la partie label-detector-service](https://github.com/AMT-TEAM07/Labelize/tree/main/label-detector-service/README.md)
 - [Mise en route de la partie cli-client](https://github.com/AMT-TEAM07/Labelize/tree/main/cli-client/README.md)
+
+## Mises en routes locales
