@@ -14,6 +14,7 @@ import java.io.IOException;
 
 
 @RestController
+@RequestMapping("/v1/label-detector-management/analyze")
 public class LabelDetectionController{
     private final AwsLabelDetector labelDetector;
     private final LabelModelAssembler assembler;
@@ -23,7 +24,7 @@ public class LabelDetectionController{
         this.assembler = new LabelModelAssembler();
     }
 
-    @PostMapping("/analyze/url")
+    @PostMapping("/url")
     public EntityModel<LabelModel> analyzeFromUrl(@RequestBody AnalyzeParams params) {
         try{
             LabelList temp = new LabelList(labelDetector.execute(params.image(), params.maxLabels(), params.minConfidence()));
@@ -35,7 +36,7 @@ public class LabelDetectionController{
         }
     }
 
-    @PostMapping("/analyze/b64")
+    @PostMapping("/b64")
     public EntityModel<LabelModel> analyzeFromB64(@RequestBody AnalyzeParams params) {
         LabelList temp = new LabelList(labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence()));
         return assembler.toModel(new LabelModel(temp));
