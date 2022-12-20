@@ -37,6 +37,20 @@ Ensuite, après avoir créé un bucket S3, il faut rajouter son nom dans le fich
 
 Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter le fichier `.env.example` qui est également à la racine du dossier `data-object-service`.
 
+## Endpoints
+Voici les endpoints actuellement disponibles:
+
+```bash
+# 
+HTTP GET http://nomdomaine/v1/data-object-management/data-objects
+
+# Stockage d'un fichier dans le bucket S3
+HTTP POST http://nomdomaine/v1/data-object-management/data-objects
+
+# Suppression d'un fichier sur le bucket S3
+HTTP DELETE http://nomdomaine/v1/data-object-management/data-objects
+```
+
 ## Mise en route
 
 1. Créer le fichier .env avec lesdites variables d'environnement.
