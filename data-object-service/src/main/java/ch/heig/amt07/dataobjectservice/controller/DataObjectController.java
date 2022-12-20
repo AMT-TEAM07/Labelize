@@ -17,7 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("data-object")
+@RequestMapping("v1/data-object-management/data-objects")
 public class DataObjectController {
     private final AwsDataObjectService dataObjectService;
 
@@ -25,7 +25,7 @@ public class DataObjectController {
         this.dataObjectService = dataObjectService;
     }
 
-    @PostMapping("upload")
+    @PostMapping()
     public ResponseEntity<EntityModel<DataObjectResponse>> upload(@RequestParam MultipartFile file) {
         var response = new DataObjectResponse();
         response.setObjectName(file.getOriginalFilename());
@@ -50,7 +50,7 @@ public class DataObjectController {
         }
     }
 
-    @GetMapping("publish")
+    @GetMapping()
     public ResponseEntity<EntityModel<DataObjectResponse>> publish(@RequestParam String objectName, @RequestParam(required = false) Optional<Long> expiration) {
         var response = new DataObjectResponse();
         response.setObjectName(objectName);
