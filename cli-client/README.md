@@ -81,5 +81,3 @@ Voici les différentes étapes:
 - Publication de l'image grâce à une URL signée
 - Analyse de l'image
 - Livraision du résultat sur le bucket hébergeant l’image.
-
-## Lancement des scénarios
