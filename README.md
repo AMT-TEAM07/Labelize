@@ -118,6 +118,7 @@ Ensuite, il vous suffit de compléter les variables d'environnement dans le fich
 Vous pouvez finalement lancer l'environnement de production en utilisant la commande suivante:
 
 ```bash
+# Dans le dossier docker-compose ou à l'emplacement du fichier docker-compose.prod.yml
 docker-compose -f docker-compose.prod.yml up
 ```
 
