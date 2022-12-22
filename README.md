@@ -1,6 +1,8 @@
 # Labelize
 
-![labelize-logo](docs/labelize-logo.svg)
+<div align="center">
+  <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
+</div>
 
 ## Collaborateurs
 
@@ -18,45 +20,80 @@
 
 ## Description
 
-Ce projet est une application Java permettant de détecter des labels sur une image fournie. Il s'agit d'une application découpée en plusieurs micro-services. De plus, cette application est conçue afin d'être capable d'utiliser plusieurs providers clouds pour la reconnaissance d'images et le stockage des données.
+Labelize est une application révolutionnaire permettant de détecter des labels sur une image fournie. Il s'agit d'une application découpée en plusieurs micro-services. De plus, cette application est conçue afin d'être capable d'utiliser plusieurs providers clouds pour la reconnaissance d'images et le stockage des données.
 
-Ce projet est la version microservice de [PictureLabelizer](https://github.com/AMT-TEAM07/PictureLabelizer).
-
-## Providers cloud supportés
-
-- [x] [AWS](https://aws.amazon.com/fr/) (🚧 développement en cours 🚧)
-- [ ] [Azure](https://azure.microsoft.com/fr-fr/)
-- [ ] [Google Cloud](https://cloud.google.com/?hl=fr)
-
-## Structure du repository
-
-Nous avons fait le choix de n'avoir qu'un seul repository pour l'ensemble du projet. Malgré le fait que nous ayons 3 projets distincts: `data-object-service`, `label-detector-service` et `cli-client`. Le `data-object-service` gère toute la partie de stockage d'objet, le `label-detector-service` gère la partie d'analyse d'images et le `cli-client` fait le lien entre les deux micro-services en utilisant leur API REST.
-
-Nous avons adapté le CI/CD pour qu'il ne lance les tests uniquement sur la partie modifiée lors du dernier commit afin d'éviter de lancer les tests sur tous les projets à chaque commit.
+Ce projet est la version micro-service de [PictureLabelizer](https://github.com/AMT-TEAM07/PictureLabelizer).
 
 ## Wiki
 
 Le [wiki](https://github.com/AMT-TEAM07/Labelize/wiki) du projet regroupe toutes les informations nécessaires pour comprendre notre méthodologie de travail, nos choix et la documentation utilisée pour implémenter notre projet.
 
-## Docker
+## Providers cloud supportés
 
-Dans repository, nous avons créé un fichier `docker-compose.yml` qui permet de lancer les deux micro-services. Pour cela, il faut se placer à la racine du dossier `docker-compose` et lancer la commande suivante:
+- [x] [AWS](https://aws.amazon.com/fr/)
+- [ ] [Azure](https://azure.microsoft.com/fr-fr/)
+- [ ] [Google Cloud](https://cloud.google.com/?hl=fr)
 
-```bash
-docker-compose -f docker-compose.prod up
+## Structure du projet et du repository
+
+Le repository de l'application contient plusieurs projets mais n'est pas pour autant un vrai monorepo avec des librairies/modules partagés. Chaque projet est un micro-service totalement indépendant.
+
+Nous avons fait le choix de ne pas utiliser de modules Maven car nous avons estimé que leur utilisation créait une dépendance allant à l'encontre de l'idée de micro-services isolés et auto-suffisants. De plus, cela nous semblait pas nécessaire pour un projet de cette taille.
+
+Nous retrouvons 3 projets distincts dans le repository:
+
+- `data-object-service`: Micro-service gérant le stockage des data-objects dans des [buckets S3](https://aws.amazon.com/fr/s3/) et offrant une API REST.
+
+- `label-detector-service`: Micro-service gérant la détection des labels sur une image en utilisant [AWS Rekognition](https://aws.amazon.com/fr/rekognition/) et offrant une API REST.
+
+- `cli-client`: Micro-service faisant le lien entre les deux autres micro-services en utilisant leur API REST. Ici, il s'agit simplement d'un exécutable JAR qui lance 3 scénarios de tests.
+
+Ainsi que le dossier `docker-compose` qui contient un fichier `docker-compose.prod.example.yml` qu'il est possible de copier et compléter pour lancer l'environnement de production sur votre machine.
+
+## CI/CD
+
+La CI/CD est gérée par des GitHub Actions. Chaque micro-service possède deux workflows.
+
+Tout d'abord, au niveau de la CI, un workflow `Verify & Package` s'occupe de lancer les tests unitaires du code et de vérifier la compilation du build de production. Ce workflow est lancé à chaque commit sur la branche `dev` et sur chaque pull request vers la branche `main`. En spécifiant le `path` dans le fichier de configuration, nous nous assurons que le workflow ne s'exécute que si des fichiers du micro-service ont été modifiés.
+
+Ensuite, pour la CD, un workflow `Deploy` s'occupe de construire et de déployer les images Docker sur [Docker Hub](https://hub.docker.com/). Ce workflow est particulier car il ne se lance que si le workflow `Verify & Package` est un succès dans la branche `main`. Nous nous assurons de cette dépendance en utilisant la propriété `workflow_run` ainsi que le check `if: ${{ github.event.workflow_run.conclusion == 'success' }}` dans le fichier de configuration des actions.
+
+Pour imager notre workflow, voic un exemple complet d'exécution lors d'un commit sur dev et d'une pull request sur main:
+
+```mermaid
+sequenceDiagram
+    actor John
+    participant gd as GitHub [dev]
+    participant gm as GitHub [main]
+    participant dh as Docker Hub
+    John->>+gd: Commit in data-object-service folder
+    activate gd
+    gd->>+gd: Run Verify & Package - Data Object Service
+    deactivate gd
+    John->>+gm: Open Pull Request : Merge dev into main
+    activate gm
+
+    alt all checks pass
+        gm-->>+John: Allow merge
+    else some check fails
+        gm-->>+John: Block merge
+    end
+    deactivate gm
+
+    John->>+gm: Merge Pull Request
+    activate gm
+    gm->>+gm: Run Verify & Package of modified services
+    
+    alt Verify & Package is a success
+        gm->>+gm: Run Deploy on Docker Hub of modified services
+        gm->>+dh: Deploy image(s)
+    end
+    deactivate gm
 ```
-
-Cela lancera `data-object-service` et `label-detector-service` sur les ports `8080` et `8081` respectivement.
 
 ## Prérequis
 
-- [Java 17 (LTS)](https://adoptium.net/temurin/releases)
-- [Maven 3.8](https://maven.apache.org/download.cgi)
-
-Optionnel mais fortement recommandé:
-
-- [IntelliJ IDEA](https://www.jetbrains.com/fr-fr/idea/download/#section=windows)
-
+- [Docker](https://docs.docker.com/get-docker/)
 ### Pour AWS
 
 #### Outils à installer :
@@ -64,34 +101,34 @@ Optionnel mais fortement recommandé:
 - AWS CLI
   - [AWS CLI Installation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
   - [AWS CLI Configuration](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html)
+## Mises en routes locales
 
-Optionnel mais fortement recommandé:
-
-- [AWS Toolkit](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-
-Les credentials doivent figurer dans le fichier `.env` à la racine des projets `data-object-service` et `label-detector-service`.
-
-Pour `data-object-service`, il faut les variables d'environnement suivantes:
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-
-Ensuite, après avoir créé un bucket S3, il faut rajouter son nom dans le fichier `.env` pour la variable suivante:
-
-- `AWS_BUCKET`
-
-Pour `label-detector-service`, il faut les variables d'environnement suivantes:
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-
-Chaque variable d'environnement a un équivalent avec un préfixe `TEST` qui est utilisé lors des tests locaux et dans la Github Action. Pour plus d'information, vous pouvez consulter les fichiers `.env.example` qui sont à la racines dedits projets.
-
-## Mise en route
-
-Afin de simplifier la mise en route des deux micro-services, nous avons créé un README dédié à chacun d'entre eux. Vous pouvez les consulter en cliquant sur les liens suivants:
+Afin de simplifier la mise en route locale des micro-services, nous avons créé un README dédié à chacun d'entre eux. Vous pouvez les consulter en cliquant sur les liens suivants:
 
 - [Mise en route de la partie data-object-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
-- [Mise en route de la partie label-detection-service](https://github.com/AMT-TEAM07/Labelize/tree/main/data-object-service/README.md)
+- [Mise en route de la partie label-detector-service](https://github.com/AMT-TEAM07/Labelize/tree/main/label-detector-service/README.md)
+- [Mise en route de la partie cli-client](https://github.com/AMT-TEAM07/Labelize/tree/main/cli-client/README.md)
+
+## Mise en route avec Docker Compose
+
+Comme mentionné précédemment, nous mettons à disposition un fichier `docker-compose.prod.example.yml` qui permet de lancer l'environnement de production sur votre machine. Ce fichier est actuellement push sur le repository et est donc accessible par tous. Nous recommandons alors de copier ce fichier et de le renommer en `docker-compose.prod.yml` (qui est présent dans le gitignore).
+
+Ensuite, il vous suffit de compléter les variables d'environnement dans le fichier avec vos propres valeurs.
+
+Vous pouvez finalement lancer l'environnement de production en utilisant la commande suivante:
+
+```bash
+# Dans le dossier docker-compose ou à l'emplacement du fichier docker-compose.prod.yml
+docker-compose -f docker-compose.prod.yml up
+```
+
+Cette commande met à disposition l'api de `data-object-service` à l'url http://localhost:8080 et l'api de `label-detector-service` sur http://localhost:8081.
+
+Puis, une fois que les deux services se sont initialisés, vous pouvez lancer le client en utilisant la commande suivante dans un autre terminal:
+
+```bash
+# Dans le dossier docker-compose ou à l'emplacement du fichier docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml run --rm --no-deps cli-client
+```
+
+Cela permet de lancer le client et de supprimer le container une fois qu'il a terminé son exécution sans avoir à relancer les autres services. Le client affichera les étapes de chaque scénario de test dans le terminal.
