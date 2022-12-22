@@ -51,33 +51,39 @@ Nous avons 3 scénarios de tests donnés par le mandant du projet. Chaque scéna
 
 ### Scénario 1
 
-Dans ce scénario, rien n'existe. Nous devons donc créer le bucket et y upload une image.
+Dans ce scénario, rien n'existe. Nous allons donc créer le bucket et upload l'image `lausanne.jpg`.
 
 Voici les différentes étapes:
+* Le bucket doit être créé
+* L’image doit être uploadée
+* Publication de l'image grâce à une URL signée
+* Analyse de l'image
+* Livraision du résultat sur le bucket hébergeant l’image.
 
-- Le bucket doit être créé
-- L’image doit être uploadée
-- Publication de l'image grâce à une URL signée
-- Analyse de l'image
-- Livraision du résultat sur le bucket hébergeant l’image.
+#### Résultat attendu
+Nous devons obtenir un fichier `lausanne.jpg` ainsi qu'un fichier `lausanne.jpg.json` dans le bucket S3. Le fichier `lausanne.jpg.json` doit contenir le résultat de l'analyse de l'image.
 
 ### Scénario 2
 
 Dans ce scénario, le bucket existe mais il est vide.
 
 Voici les différentes étapes:
+* L’image doit être uploadée
+* Publication de l'image grâce à une URL signée
+* Analyse de l'image
+* Livraision du résultat sur le bucket hébergeant l’image.
 
-- L’image doit être uploadée
-- Publication de l'image grâce à une URL signée
-- Analyse de l'image
-- Livraision du résultat sur le bucket hébergeant l’image.
+#### Résultat attendu
+Nous devons obtenir un fichier `montreux.jpg` ainsi qu'un fichier `montreux.jpg.json` dans le bucket S3. Le fichier `montreux.jpg.json` doit contenir le résultat de l'analyse de l'image.
 
 ### Scénario 3
 
-Dans ce scénario, le bucket existe et l'image y est déjà stockée.
+Dans ce scénario, le bucket existe et l'image `tour-de-peilz.jpg` y est déjà stockée.
 
 Voici les différentes étapes:
+* Publication de l'image grâce à une URL signée
+* Analyse de l'image
+* Livraision du résultat sur le bucket hébergeant l’image.
 
-- Publication de l'image grâce à une URL signée
-- Analyse de l'image
-- Livraision du résultat sur le bucket hébergeant l’image.
+#### Résultat attendu
+Nous devons obtenir un fichier `tour-de-peilz.jpg.json` dans le bucket S3. Ce fichier contient le résultat de l'analyse de l'image.
