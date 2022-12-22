@@ -111,16 +111,22 @@ Afin de simplifier la mise en route locale des micro-services, nous avons créé
 
 ## Mise en route avec Docker Compose
 
-Une fois que vous avez complété le fichier `docker-compose.prod.example.yml`, vous pouvez lancer l'environnement de production en utilisant la commande suivante:
+Comme mentionné précédemment, nous mettons à disposition un fichier `docker-compose.prod.example.yml` qui permet de lancer l'environnement de production sur votre machine. Ce fichier est actuellement push sur le repository et est donc accessible par tous. Nous recommandons alors de copier ce fichier et de le renommer en `docker-compose.prod.yml` (qui est présent dans le gitignore).
+
+Ensuite, il vous suffit de compléter les variables d'environnement dans le fichier avec vos propres valeurs.
+
+Vous pouvez finalement lancer l'environnement de production en utilisant la commande suivante:
 
 ```bash
-docker-compose -f docker-compose.prod.example.yml up
+docker-compose -f docker-compose.prod.yml up
 ```
 
-Puis, une fois que les deux services Spring Boot se sont initialisés, vous pouvez lancer le client en utilisant la commande suivante:
+Cette commande met à disposition l'api de `data-object-service` à l'url `http://localhost:8080` et l'api de `label-detector-service` sur `http://localhost:8081`.
+
+Puis, une fois que les deux services se sont initialisés, vous pouvez lancer le client en utilisant la commande suivante dans un autre terminal:
 
 ```bash
 docker compose -f docker-compose.prod.yml run --rm --no-deps cli-client
 ```
 
-Cela permet de lancer le client dans un container Docker et de supprimer le container une fois que le client a terminé son exécution.
+Cela permet de lancer le client et de supprimer le container une fois qu'il a terminé son exécution sans avoir à relancer les autres services. Le client affichera les étapes de chaque scénario de test dans le terminal.
