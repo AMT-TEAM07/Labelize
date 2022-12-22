@@ -126,6 +126,7 @@ Cette commande met à disposition l'api de `data-object-service` à l'url http:/
 Puis, une fois que les deux services se sont initialisés, vous pouvez lancer le client en utilisant la commande suivante dans un autre terminal:
 
 ```bash
+# Dans le dossier docker-compose ou à l'emplacement du fichier docker-compose.prod.yml
 docker compose -f docker-compose.prod.yml run --rm --no-deps cli-client
 ```
 
