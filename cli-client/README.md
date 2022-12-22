@@ -1,5 +1,9 @@
 # Labelize : CLI Client
 
+<div align="center">
+  <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
+</div>
+
 [![Verify & Package - CLI Client](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-verify.yml) [![Deploy on Docker Hub - CLI Client](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/cli-client-deploy.yml)
 
 Ce micro-service fait parti du projet [Labelize](https://github.com/AMT-TEAM07/Labelize).

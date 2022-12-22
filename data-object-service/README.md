@@ -1,5 +1,9 @@
 # Labelize : data-object-service
 
+<div align="center">
+  <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
+</div>
+
 [![Verify & Package - Data Object Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-verify.yml) [![Deploy on Docker Hub - Data Object Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/data-object-deploy.yml)
 
 Ce micro-service fait parti du projet [Labelize](https://github.com/AMT-TEAM07/Labelize).

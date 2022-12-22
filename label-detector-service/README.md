@@ -1,5 +1,9 @@
 # Labelize : label-detector-service
 
+<div align="center">
+  <img src="https://github.com/AMT-TEAM07/Labelize/raw/main/docs/labelize-logo.svg" \>
+</div>
+
 [![Verify & Package - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-verify.yml) [![Deploy on Docker Hub - Label Detector Service](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml/badge.svg)](https://github.com/AMT-TEAM07/Labelize/actions/workflows/label-detector-deploy.yml)
 
 Ce micro-service fait parti du projet [Labelize](https://github.com/AMT-TEAM07/Labelize).
