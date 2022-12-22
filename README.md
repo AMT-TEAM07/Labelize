@@ -121,7 +121,7 @@ Vous pouvez finalement lancer l'environnement de production en utilisant la comm
 docker-compose -f docker-compose.prod.yml up
 ```
 
-Cette commande met à disposition l'api de `data-object-service` à l'url `http://localhost:8080` et l'api de `label-detector-service` sur `http://localhost:8081`.
+Cette commande met à disposition l'api de `data-object-service` à l'url http://localhost:8080 et l'api de `label-detector-service` sur http://localhost:8081.
 
 Puis, une fois que les deux services se sont initialisés, vous pouvez lancer le client en utilisant la commande suivante dans un autre terminal:
 
