@@ -58,7 +58,7 @@ Tout d'abord, au niveau de la CI, un workflow `Verify & Package` s'occupe de lan
 
 Ensuite, pour la CD, un workflow `Deploy` s'occupe de construire et de déployer les images Docker sur [Docker Hub](https://hub.docker.com/). Ce workflow est particulier car il ne se lance que si le workflow `Verify & Package` est un succès dans la branche `main`. Nous nous assurons de cette dépendance en utilisant la propriété `workflow_run` ainsi que le check `if: ${{ github.event.workflow_run.conclusion == 'success' }}` dans le fichier de configuration des actions.
 
-Pour imager notre workflow, voic un exemple complet d'exécution lors d'un commit sur dev et d'une pull request sur main:
+Pour imager notre workflow, voici un exemple complet d'exécution lors d'un commit sur dev et d'une pull request sur main:
 
 ```mermaid
 sequenceDiagram
@@ -114,6 +114,10 @@ Afin de simplifier la mise en route locale des micro-services, nous avons créé
 Comme mentionné précédemment, nous mettons à disposition un fichier `docker-compose.prod.example.yml` qui permet de lancer l'environnement de production sur votre machine. Ce fichier est actuellement push sur le repository et est donc accessible par tous. Nous recommandons alors de copier ce fichier et de le renommer en `docker-compose.prod.yml` (qui est présent dans le gitignore).
 
 Ensuite, il vous suffit de compléter les variables d'environnement dans le fichier avec vos propres valeurs.
+Si vous n'avez pas déployé d'images, vous pouvez utiliser les suivantes:
+* data-object: lazzzer/data-object-service:latest
+* label-detector: lazzzer/label-detector-service:latest
+* cli-client: lazzzer/cli-client:latest
 
 Vous pouvez finalement lancer l'environnement de production en utilisant la commande suivante:
 
