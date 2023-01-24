@@ -75,6 +75,9 @@ public class AwsLabelDetector {
         return LabelWrapper.from(awsLabels);
     }
 
+    // TODO pourquoi vous utilisez une erreur de
+    // java.security.InvalidParameterException ? Utilisez une erreur de votre choix,
+    // par exemple une erreur de votre application.
     private void checkNbLabelsAndMinConfidence(int nbLabels, double minConfidence) throws InvalidParameterException {
         if (nbLabels < 1) {
             throw new InvalidParameterException("nbLabels must be at least 1");

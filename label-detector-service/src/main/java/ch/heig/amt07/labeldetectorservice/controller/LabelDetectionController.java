@@ -14,6 +14,7 @@ import java.io.IOException;
 
 
 @RestController
+// TODO gestion des exceptions et mapping des codes HTTP ?
 @RequestMapping("/v1/label-detector-management/analyze")
 public class LabelDetectionController{
     private final AwsLabelDetector labelDetector;
@@ -24,6 +25,10 @@ public class LabelDetectionController{
         this.assembler = new LabelModelAssembler();
     }
 
+    // TODO considérez utilsier un seul URI pour votre resource "Label" et utilsier
+    // un paramètre pour spécifier le type d'analyse vous faites ou déduisez le a
+    // partir de la présence ou non de paramètres
+    // TODO ça devrait etre un GET, pas un post vu que vous modifiez pas la resource
     @PostMapping("/url")
     public EntityModel<LabelModel> analyzeFromUrl(@RequestBody AnalyzeParams params) {
         try{
@@ -36,6 +41,7 @@ public class LabelDetectionController{
         }
     }
 
+    // TODO ça devrait etre un GET, pas un post vu que vous modifiez pas la resource
     @PostMapping("/b64")
     public EntityModel<LabelModel> analyzeFromB64(@RequestBody AnalyzeParams params) {
         LabelList temp = new LabelList(labelDetector.executeB64(params.image(), params.maxLabels(), params.minConfidence()));
