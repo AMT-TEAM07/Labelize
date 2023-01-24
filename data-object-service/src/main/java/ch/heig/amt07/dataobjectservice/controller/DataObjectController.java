@@ -43,6 +43,8 @@ public class DataObjectController {
             return ResponseEntity.status(HttpStatus.CREATED).body(entity);
         } catch (ObjectAlreadyExistsException e) {
             response.setMessage("Object already exists");
+            // c'est plus un 409 Conflict mais je vous pénalise pas si c'est la seule faut
+            // de code http vu que l'intention de les gérer y est
             return ResponseEntity.badRequest().body(entity);
         } catch (Exception e) {
             response.setMessage("Error while uploading object");
